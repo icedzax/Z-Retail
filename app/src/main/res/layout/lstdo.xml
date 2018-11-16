@@ -1,0 +1,62 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:id="@+id/lnx"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:layout_marginTop="2dp"
+    android:background="@drawable/selector"
+    android:orientation="horizontal"
+    android:padding="5dp"
+    android:weightSum="5">
+
+
+    <LinearLayout
+        android:id="@+id/lx"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        android:weightSum="1">
+
+        <TextView
+            android:id="@+id/lblmatcode"
+            android:layout_width="90dp"
+            android:layout_height="wrap_content"
+            android:textColor="#0d0d0d"
+            android:textSize="15sp"
+
+            />
+
+        <TextView
+            android:id="@+id/lblposnr"
+            android:layout_width="20dp"
+            android:layout_height="wrap_content"
+            android:textColor="#ff0000"
+            android:textStyle="bold" />
+
+        <TextView
+            android:id="@+id/lbldesc"
+            android:layout_width="125dp"
+            android:layout_height="wrap_content"
+            android:layout_marginLeft="1dp"
+
+            android:textColor="#20435b"
+            android:textSize="15sp" />
+
+        <TextView
+            android:id="@+id/lblstatus"
+            android:layout_width="15dp"
+            android:layout_height="wrap_content"
+            android:textColor="@color/colorPrimary"
+            android:textStyle="bold" />
+
+        <TextView
+            android:id="@+id/llblamout"
+            android:layout_width="78dp"
+            android:layout_height="wrap_content"
+            android:textColor="#0d0d0d"
+            android:textSize="15sp" />
+    </LinearLayout>
+
+
+</LinearLayout>
+

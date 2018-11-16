@@ -1,0 +1,17 @@
+<resources>
+    <string name="app_name">ขึ้นของP8 1.6</string>
+    <string name="action_settings">ขึ้นของP8 1.6</string>
+    <string name="title_activity_login">ขึ้นของP8 1.6</string>
+    <string name="title_activity_checkversion">ขึ้นของP8 1.6</string>
+    <string name="title_activity_check_version">ขึ้นของP8 1.6</string>
+    <string name="title_activity_retail_list">ขึ้นของP8 1.6</string>
+    <string name="title_home">ขึ้นของP8 1.6</string>
+    <string name="title_dashboard">ขึ้นของP8 1.6</string>
+    <string name="title_notifications">ขึ้นของP8 1.6</string>
+    <string name="title_activity_list_do">ขึ้นของP8 1.6</string>
+    <string name="title_activity_add_products">ขึ้นของP8 1.6</string>
+    <string name="button_text">ปิดจบ</string>
+    <string name="button_textf">ปิดจบแล้ว</string>
+    <string name="title_activity_ar_list">ar_list</string>
+
+</resources>
