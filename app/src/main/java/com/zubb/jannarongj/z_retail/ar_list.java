@@ -53,10 +53,10 @@ public class ar_list extends AppCompatActivity {
         @Override
         protected void onPostExecute(String r) {
 
-            String[] from = {"VBELN","ARKTX","POSNR","CARLICENSE" };
-            int[] views = {R.id.vbeln,R.id.arktx,R.id.posnr,R.id.carlicense};
+            String[] from = {"VBELN","AR_NAME","CARLICENSE" };
+            int[] views = {R.id.vbeln,R.id.ar_name,R.id.carlicense};
              ADA = new SimpleAdapter(ar_list.this,
-                    vbelnlist, R.layout.adp_listitem, from,
+                    vbelnlist, R.layout.adp_list_ar, from,
                     views);
             list_vbeln.setAdapter(ADA);
             list_vbeln.setOnItemClickListener(new AdapterView.OnItemClickListener() {
@@ -70,9 +70,7 @@ public class ar_list extends AppCompatActivity {
 
                     Intent i = new Intent(ar_list.this, AddProducts.class);
                     i.putExtra("vbeln", (String) obj.get("VBELN"));
-                    i.putExtra("posnr", (String) obj.get("POSNR"));
 
-                    //Toast.makeText(TransferList.this, (String) obj.get("POSNR"), Toast.LENGTH_SHORT).show();
 
                     startActivity(i);
 
@@ -94,14 +92,17 @@ public class ar_list extends AppCompatActivity {
                 } else {
                     String where = "";
                     if(params[0]==null || params[0].equals("")){
-                        where = "";
+                        where = " where s.VBELN is not null and s.ARKTX not like 'billet%' ";
                     }else{
-                        where = " where VBELN like '%"+params[0].trim()+"%' ";
+                        where = " where s.VBELN is not null and s.ARKTX not like 'billet%' and s.VBELN like '%"+params[0].trim()+"%' ";
                     }
 
-                    String query = "SELECT convert(nvarchar(20),wadat,103) as wadat,VBELN,POSNR,KUNNR,AR_NAME,CARLICENSE " +
-                            "      ,MATNR,ARKTX " +
-                            "  FROM vw_shipment_zubb_mmt " + where ;
+                    String query = "SELECT s.WADAT,s.VBELN,s.AR_NAME,s.CARLICENSE" +
+                            " FROM           gr_shipmentplan  as s LEFT JOIN dbo.tbl_shipment_item as i " +
+                            " on i.VBELN = s.VBELN and i.POSNR = s.POSNR "
+                            + where +
+                            " group by s.VBELN,s.AR_NAME,s.CARLICENSE,s.WADAT" +
+                            " order by 1 desc "  ;
 
                     PreparedStatement ps = con.prepareStatement(query);
                     ResultSet rs = ps.executeQuery();
@@ -109,14 +110,10 @@ public class ar_list extends AppCompatActivity {
                     vbelnlist.clear();
                     while (rs.next()) {
                         Map<String, String> datanums = new HashMap<String, String>();
-                        datanums.put("wadat", rs.getString("wadat"));
-                        datanums.put("VBELN", rs.getString("VBELN")+"-"+rs.getString("POSNR"));
-                        datanums.put("POSNR", rs.getString("POSNR"));
-                        datanums.put("KUNNR", rs.getString("KUNNR"));
+                        datanums.put("WADAT", rs.getString("WADAT"));
+                        datanums.put("VBELN", rs.getString("VBELN"));
                         datanums.put("AR_NAME", rs.getString("AR_NAME"));
                         datanums.put("CARLICENSE", rs.getString("CARLICENSE"));
-                        datanums.put("MATNR",rs.getString("MATNR"));
-                        datanums.put("ARKTX",rs.getString("ARKTX"));
 
                         vbelnlist.add(datanums);
 

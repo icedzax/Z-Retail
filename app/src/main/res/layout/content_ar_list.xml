@@ -19,7 +19,7 @@
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:background="#0003b6"
+            android:background="#62d199"
             android:orientation="horizontal">
 
             <TextView
@@ -28,7 +28,6 @@
                 android:layout_height="wrap_content"
                 android:layout_weight="1"
                 android:padding="2dp"
-                android:text="ไทย หวั้ง อโกรโปรดักส์ อินเตอร์เนชั่นแนล"
                 android:textAlignment="center"
                 android:textColor="#ffffff"
                 android:textSize="17sp"
@@ -64,5 +63,10 @@
                 android:textSize="17sp"
                 android:textStyle="bold" />
         </LinearLayout>
+
+        <ListView
+            android:id="@+id/lvb"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent" />
     </LinearLayout>
 </RelativeLayout>
