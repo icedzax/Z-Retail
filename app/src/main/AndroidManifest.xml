@@ -22,7 +22,7 @@
         <activity
             android:name=".Login"
             android:label="@string/title_activity_login"
-            android:theme="@style/AppTheme.NoActionBar"></activity>
+            android:theme="@style/AppTheme.NoActionBar" />
         <activity
             android:name=".CheckVersion"
             android:label="@string/title_activity_check_version"
@@ -36,11 +36,11 @@
         <activity
             android:name=".RetailList"
             android:label="@string/title_activity_retail_list"
-            android:theme="@style/AppTheme.NoActionBar"></activity>
+            android:theme="@style/AppTheme.NoActionBar" />
         <activity
             android:name=".ListDo"
             android:label="@string/title_activity_list_do"
-            android:theme="@style/AppTheme.NoActionBar"></activity>
+            android:theme="@style/AppTheme.NoActionBar" />
         <activity
             android:name=".AddProducts"
             android:label="@string/title_activity_add_products"
@@ -48,6 +48,10 @@
         <activity
             android:name=".ar_list"
             android:label="@string/title_activity_ar_list"
+            android:theme="@style/AppTheme.NoActionBar" />
+        <activity
+            android:name="com.zubb.jannarongj.zzubp8.Test"
+            android:label="@string/title_activity_test"
             android:theme="@style/AppTheme.NoActionBar"></activity>
     </application>
 

@@ -59,36 +59,29 @@
             android:id="@+id/tgg1"
             android:layout_width="48dp"
             android:layout_height="48dp"
-            android:layout_marginLeft="10dp"
+            android:layout_marginLeft="15dp"
             android:background="@drawable/toggle1" />
 
         <ToggleButton
             android:id="@+id/tgg2"
             android:layout_width="48dp"
             android:layout_height="48dp"
-            android:layout_marginLeft="18dp"
+            android:layout_marginLeft="32dp"
             android:background="@drawable/toggle2" />
 
         <ToggleButton
             android:id="@+id/tgg3"
             android:layout_width="48dp"
             android:layout_height="48dp"
-            android:layout_marginLeft="18dp"
+            android:layout_marginLeft="32dp"
             android:background="@drawable/toggle3" />
 
         <ToggleButton
             android:id="@+id/tgg4"
             android:layout_width="48dp"
             android:layout_height="48dp"
-            android:layout_marginLeft="18dp"
+            android:layout_marginLeft="32dp"
             android:background="@drawable/toggle4" />
-
-        <ToggleButton
-            android:id="@+id/tgg5"
-            android:layout_width="48dp"
-            android:layout_height="48dp"
-            android:layout_marginLeft="18dp"
-            android:background="@drawable/toggle5" />
 
     </LinearLayout>
 

@@ -20,6 +20,8 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.view.Window;
 import android.view.WindowManager;
+import android.view.animation.AlphaAnimation;
+import android.view.animation.Animation;
 import android.view.inputmethod.EditorInfo;
 import android.widget.AdapterView;
 import android.widget.Button;
@@ -27,8 +29,11 @@ import android.widget.EditText;
 import android.widget.ListView;
 import android.widget.ProgressBar;
 import android.widget.SimpleAdapter;
+import android.widget.Switch;
 import android.widget.TextView;
 import android.widget.Toast;
+
+import org.w3c.dom.Text;
 
 import java.sql.Connection;
 import java.sql.PreparedStatement;
@@ -48,15 +53,17 @@ public class AddProducts extends AppCompatActivity {
     ProgressBar pbbar;
     EditText hideEdt;
     ListView lvitem;
-    Button btn_del,btn_split;
+    Button btn_del,btn_split,btn_pick;
     static Boolean split_flag = false;
     static Boolean transfer = false;
 
     TextView tv_up,txtw2,tv_splittxt,tv_limit,tv_rs,tv_w1,tv_w2,tv_documentid,tv_vbeln,tv_ar_name,tv_arktx,tv_wadat,tv_carlicense,tv_tagw,tv_sumw,tv_sumbun,tv_sumqty,tv_wdate1,tv_wdate2;
-    String itxt,scanresult,h_unit,h_wdate1,h_wdate2,h_stat,g_vbeln,g_posnr,h_vbeln,h_posnr,h_ar_name,h_arktx,h_wadat,h_carlicense,h_kunnr,h_matnr,tab_hn,tab_id,tab_bun,h_documentid;
+    String itxt,scanresult,h_unit,h_wdate1,h_wdate2,g_vbeln,g_posnr,h_vbeln,h_posnr,h_ar_name,h_arktx,h_wadat,h_carlicense,h_kunnr,h_matnr,tab_hn,tab_id,tab_bun,h_documentid;
     String h_wadatx,user,rmd_date,ver,rmd_charge,r_bundle,r_qty,matcode,rmd_period,rmd_spec,rmd_size,rmd_grade,rmd_length,rmd_weight,rmd_qa_grade,rmd_remark,rmd_plant,rmd_station;
     String bar_id,dSize,dBar_id,dCharge,dBundle,dVbeln,dUser,dStamp;
-    String hm,sm;
+    String hm,sm,userPlant;
+
+    List<Map<String, String>> stocklist  = new ArrayList<Map<String, String>>();
 
     public int getErNf() {
         return erNf;
@@ -104,15 +111,7 @@ public class AddProducts extends AppCompatActivity {
     int erCar;
     int erDup;
 
-    public int getErQi() {
-        return erQi;
-    }
-
-    public void setErQi(int erQi) {
-        this.erQi = erQi;
-    }
-
-    int erQi;
+    int erQi,h_std = 0,h_ntgew =0;
 
     List<Map<String, String>> itemlist  = new ArrayList<Map<String, String>>();
     ForegroundColorSpan frcRed = new ForegroundColorSpan(Color.RED);
@@ -171,6 +170,8 @@ public class AddProducts extends AppCompatActivity {
         tv_splittxt.setVisibility(View.GONE);
         txtw2 = (TextView)findViewById(R.id.txtw2);
         tv_up = (TextView)findViewById(R.id.tv_up);
+        btn_pick = (Button)findViewById(R.id.btn_pick);
+        userPlant = usrHelper.getPlant();
         FillList fillList = new FillList();
         fillList.execute(g_vbeln.trim(),g_posnr.trim());
 
@@ -182,9 +183,9 @@ public class AddProducts extends AppCompatActivity {
             @Override
             public void onClick(View v) {
 
-                /*if (getErCar()!=0) {
+                if (getErCar()!=0) {
                     onErrorDialog(0,getErCar(),0,0,0);
-                }else{ */
+                }else{
                 if(split_flag==true){
                     lvitem.setVisibility(View.VISIBLE);
                     tv_splittxt.setVisibility(View.GONE);
@@ -198,7 +199,7 @@ public class AddProducts extends AppCompatActivity {
                     split_flag = true;
                    // Toast.makeText(AddProducts.this, split_flag.toString(), Toast.LENGTH_SHORT).show();
                }
-            // }
+             }
           }
         });
 
@@ -226,9 +227,9 @@ public class AddProducts extends AppCompatActivity {
 
             @Override
             public void onClick(View v) {
-                /*if (getErCar()!=0) {
+                if (getErCar()!=0) {
                     onErrorDialog(0,getErCar(),0,0,0);
-                } else {*/
+                } else {
 
                     if (tab_hn == null) {
                         AlertDialog.Builder builder =
@@ -266,10 +267,22 @@ public class AddProducts extends AppCompatActivity {
 
 
                     }
-            //    }
+                }
             }
         });
 
+        btn_pick.setOnClickListener(new View.OnClickListener(){
+
+            @Override
+            public void onClick(View v) {
+                if (getErCar()!=0) {
+                    onErrorDialog(0,getErCar(),0,0,0);
+                } else {
+                    FetchStock fstock = new FetchStock();
+                    fstock.execute(h_matnr,userPlant);
+                }
+            }
+        });
 
     }
 
@@ -292,9 +305,15 @@ public class AddProducts extends AppCompatActivity {
 
         if(rsscan.length()>0){
             this.scanresult = rsscan;
+                if(rsscan.equals(h_matnr.trim())){
+                    AddProScan addProScan = new AddProScan();
+                    addProScan.execute(rsscan,"R"); // retail
+                    split_flag = true;
+                }else{
+                    AddProScan addProScan = new AddProScan();
+                    addProScan.execute(rsscan,"W");
 
-                AddProScan addProScan = new AddProScan();
-                addProScan.execute(rsscan);
+                }
 
 
             this.hideEdt.setText("");
@@ -311,6 +330,7 @@ public class AddProducts extends AppCompatActivity {
         String shn,sqty;
 
         Boolean isSuccess = false;
+        Boolean isRetail = false;
 
         @Override
         protected void onPreExecute() {
@@ -325,7 +345,12 @@ public class AddProducts extends AppCompatActivity {
                 if(split_flag==false){
                     Toast.makeText(AddProducts.this, z, Toast.LENGTH_SHORT).show();
                 }else{
-                    splitInsert(shn, Integer.parseInt(sqty));
+                    if(isRetail==true){
+                        splitInsert(scanresult, 1,true); //todo retail
+                    }else{
+                        splitInsert(shn, Integer.parseInt(sqty),false);
+                    }
+
                 }
             }else{
                 onErrorDialog(getErDup(),getErCar(),getErNf(),getErMm(),getErNm());
@@ -354,110 +379,121 @@ public class AddProducts extends AppCompatActivity {
                     while (cks.next()) {
                         barCheck = cks.getString("bar_id");
                     }
-
-                    setErDup(0);setErCar(0);setErNm(0);setErMm(0);setErNf(0);
-
-                    if(barCheck==null || barCheck.equals("")){
-
-                        setErNf(1);
-
-                    }else{
-
-                        String checkDup = "Select top 1 * from vw_shipment_dup where item_barcode = '" + params[0].trim() + "' and split_bundle = 0 and left(vbeln,1) <> '3'    order by add_stamp desc  ";
-                        PreparedStatement cd = con.prepareStatement(checkDup);
-                        ResultSet cdps = cd.executeQuery();
-
-                        while (cdps.next()) {
-                            dBar_id = cdps.getString("item_barcode");
-                            dCharge = cdps.getString("charge");
-                            dBundle = cdps.getString("bundle");
-                            dUser = cdps.getString("user_add");
-                            dStamp = cdps.getString("add_stamp");
-                            dVbeln = cdps.getString("vbeln");
-                            dSize = cdps.getString("size");
-                            cDup = cdps.getString("item_barcode");
-                        }
-
-                        if(cDup.equals("")){
-                            setErDup(0);
-                        }else{
-                            setErDup(1);
-                        }
-
-                        String scanS = "SELECT bar_id,rmd_date " +
-                                " ,rmd_charge,r_bundle,r_qty,matcode " +
-                                " ,rmd_size,rmd_grade " +
-                                " ,rmd_weight,rmd_qa_grade,rmd_remark " +
-                                "  FROM  " +
-                                "  vw_barcode_item where bar_id = '" + params[0].trim() + "' ";
-                        PreparedStatement getDataSt = con.prepareStatement(scanS);
-                        ResultSet rs = getDataSt.executeQuery();
-                        while (rs.next()) {
-
-                            bar_id = rs.getString("bar_id");
-                            rmd_date =rs.getString("rmd_date");
-                            //rmd_no = rs.getString("rmd_no");
-                            rmd_charge = rs.getString("rmd_charge");
-                            r_bundle = rs.getString("r_bundle");
-                            r_qty = rs.getString("r_qty");
-                            matcode = rs.getString("matcode");
-                            //rmd_period = rs.getString("rmd_period");
-                            //rmd_spec = rs.getString("rmd_spec");
-                            rmd_size = rs.getString("rmd_size");
-                            rmd_grade = rs.getString("rmd_grade");
-                            //rmd_length = rs.getString("rmd_length");
-                            rmd_weight = rs.getString("rmd_weight");
-                            rmd_qa_grade = rs.getString("rmd_qa_grade");
-                            rmd_remark = rs.getString("rmd_remark");
-                            //rmd_plant = rs.getString("rmd_plant");
-                            //rmd_station = rs.getString("rmd_station");
-
-                        }
-                        shn = rmd_charge+"-"+r_bundle;
-                        sqty = r_qty;
-
-                        if(matcode==null || matcode.equals("") || matcode.length()<4){
-                            setErNm(1);
-                        }else{
-                            String hmat = h_matnr.trim();
-                            String smat = matcode.trim();
-
-                            int mm = 3 ;
-                            if(hmat.substring(0,3).equals("RBF") || hmat.substring(0,3).equals("RBM") || hmat.substring(0,3).equals("DBM") || hmat.substring(0,3).equals("DBF")){
-                                mm = 1 ;
-                            }
-                            sm = smat.substring(0,mm)+""+smat.substring(4,smat.length());
-                            hm = hmat.substring(0,mm)+""+hmat.substring(4,hmat.length());
-
-                            if(hm.equals(sm)){
-                                setErMm(0);
-                            }else{
-                                setErMm(1);
-                            }
-
-                        }
-                        Log.d("er_hm",hm);
-                        Log.d("er_sm",sm);
-
-                        if(getErDup()==0 && /*getErCar()==0 && */getErNf()==0 &&getErMm()==0 &&getErNm()==0){
-                            if(split_flag==false){
-                                String insrt = "insert into tbl_shipment_item (VBELN,POSNR,charge,bundle,grade,size,weight," +
-                                        "location,add_stamp,item_barcode,user_add,del_stamp,del_user,qty,unit,mat_code,WADAT," +
-                                        "carlicense,DocumentId,qa_grade,KUNNR,AR_NAME,split_bundle,rmd_date) "+
-                                        "values ('"+h_vbeln+"','"+h_posnr+"','"+rmd_charge+"','"+r_bundle+"','"+rmd_grade+"'," +
-                                        "'"+h_arktx+"','"+rmd_weight+"','ZUBB',current_timestamp,'"+params[0]+"','"+user+"_"+ver+"'," +
-                                        "NULL,NULL,'"+r_qty+"','"+h_unit+"','"+matcode+"','"+h_wadatx+"','"+h_carlicense+"','"+h_documentid+"'," +
-                                        "'"+rmd_qa_grade+"','"+h_kunnr+"','"+h_ar_name+"',0,'"+rmd_date+"')";
-
-                                PreparedStatement preparedStatement = con.prepareStatement(insrt);
-                                preparedStatement.executeUpdate();
-                                isSuccess=true ;
-                                z = "บันทึกเรียบร้อยแล้ว";
-                            }isSuccess = true;
-
+//todo car set get setErCar()
+                    setErDup(0);/*setErCar(0);*/setErNm(0);setErMm(0);setErNf(0);
+                    if(params[1].equals("R")){
+                        if(getErCar()==0){
+                            isRetail = true;
+                            isSuccess = true;
                         }else{
                             isSuccess = false;
+                        }
 
+                    }else {
+                        if (barCheck == null || barCheck.equals("")) {
+                            setErNf(1);
+                        } else {
+
+                            String checkDup = "Select top 1 * from tbl_shipment_item where item_barcode = '" + params[0].trim() + "' and split_bundle = 0 and left(vbeln,1) <> '3'    order by add_stamp desc  ";
+                            PreparedStatement cd = con.prepareStatement(checkDup);
+                            ResultSet cdps = cd.executeQuery();
+
+                            while (cdps.next()) {
+                                dBar_id = cdps.getString("item_barcode");
+                                dCharge = cdps.getString("charge");
+                                dBundle = cdps.getString("bundle");
+                                dUser = cdps.getString("user_add");
+                                dStamp = cdps.getString("add_stamp");
+                                dVbeln = cdps.getString("vbeln");
+                                dSize = cdps.getString("size");
+                                cDup = cdps.getString("item_barcode");
+                            }
+
+                            if (cDup.equals("")) {
+                                setErDup(0);
+                            } else {
+                                setErDup(1);
+                            }
+
+                            String scanS = "SELECT bar_id,rmd_date " +
+                                    " ,rmd_charge,r_bundle,r_qty,matcode " +
+                                    " ,rmd_size,rmd_grade " +
+                                    " ,rmd_weight,rmd_qa_grade,rmd_remark " +
+                                    "  FROM  " +
+                                    "  vw_barcode_item where bar_id = '" + params[0].trim() + "' ";
+                            PreparedStatement getDataSt = con.prepareStatement(scanS);
+                            ResultSet rs = getDataSt.executeQuery();
+                            while (rs.next()) {
+
+                                bar_id = rs.getString("bar_id");
+                                rmd_date = rs.getString("rmd_date");
+                                //rmd_no = rs.getString("rmd_no");
+                                rmd_charge = rs.getString("rmd_charge");
+                                r_bundle = rs.getString("r_bundle");
+                                r_qty = rs.getString("r_qty");
+                                matcode = rs.getString("matcode");
+                                //rmd_period = rs.getString("rmd_period");
+                                //rmd_spec = rs.getString("rmd_spec");
+                                rmd_size = rs.getString("rmd_size");
+                                rmd_grade = rs.getString("rmd_grade");
+                                //rmd_length = rs.getString("rmd_length");
+                                rmd_weight = rs.getString("rmd_weight");
+                                rmd_qa_grade = rs.getString("rmd_qa_grade");
+                                rmd_remark = rs.getString("rmd_remark");
+                                //rmd_plant = rs.getString("rmd_plant");
+                                //rmd_station = rs.getString("rmd_station");
+
+                            }
+                            shn = rmd_charge + "-" + r_bundle;
+                            sqty = r_qty;
+
+                            if (matcode == null || matcode.equals("") || matcode.length() < 4) {
+                                setErNm(1);
+                            } else {
+                                String hmat = h_matnr.trim();
+                                String smat = matcode.trim();
+
+                                int mm = 3;
+                                if (hmat.substring(0, 3).equals("RBF") || hmat.substring(0, 3).equals("RBM") || hmat.substring(0, 3).equals("DBM") || hmat.substring(0, 3).equals("DBF")) {
+                                    mm = 1;
+                                }
+                                sm = smat.substring(0, mm) + "" + smat.substring(4, smat.length());
+                                hm = hmat.substring(0, mm) + "" + hmat.substring(4, hmat.length());
+
+                                if (hm.equals(sm)) {
+                                    setErMm(0);
+                                } else {
+                                    setErMm(1);
+                                }
+
+                            }
+                            //Log.d("er_hm",hm);
+                            //Log.d("er_sm",sm);
+
+                            if (getErDup() == 0 && getErCar()==0 && getErNf() == 0 && getErMm() == 0 && getErNm() == 0) {
+
+                                if (split_flag == false) {
+
+                                    String insrt = "insert into tbl_shipment_item (VBELN,POSNR,charge,bundle,grade,size,weight," +
+                                            "location,add_stamp,item_barcode,user_add,del_stamp,del_user,qty,unit,mat_code,WADAT," +
+                                            "carlicense,DocumentId,qa_grade,KUNNR,AR_NAME,split_bundle,rmd_date) " +
+                                            "values ('" + h_vbeln + "','" + h_posnr + "','" + rmd_charge + "','" + r_bundle + "','" + rmd_grade + "'," +
+                                            "'" + h_arktx + "','" + rmd_weight + "','" + usrHelper.getPlant() + "',current_timestamp,'" + params[0] + "','" + user + "_" + ver + "'," +
+                                            "NULL,NULL,'" + r_qty + "','" + h_unit + "','" + matcode + "','" + h_wadatx + "','" + h_carlicense + "','" + h_documentid + "'," +
+                                            "'" + rmd_qa_grade + "','" + h_kunnr + "','" + h_ar_name + "',0,'" + rmd_date + "')";
+
+                                    PreparedStatement preparedStatement = con.prepareStatement(insrt);
+                                    preparedStatement.executeUpdate();
+                                    isSuccess = true;
+                                    z = "บันทึกเรียบร้อยแล้ว";
+
+                                }
+                                isSuccess = true;
+
+                            } else {
+                                isSuccess = false;
+
+                            }
                         }
                     }
                 }
@@ -522,21 +558,37 @@ public class AddProducts extends AppCompatActivity {
                     while (rms.next()) {
                         maxspl = rms.getInt("split_bundlex");
                     }
+                    int paramQty = Integer.parseInt(params[1]);
+                    int nweight = (h_ntgew/h_limit)*paramQty;
+                            if(params[2].equals("R")){
+                                String insrt = "insert into tbl_shipment_item (VBELN,POSNR,charge,bundle,grade,size,weight," +
+                                        "location,add_stamp,item_barcode,user_add,del_stamp,del_user,qty,unit,mat_code,WADAT," +
+                                        "carlicense,DocumentId,qa_grade,KUNNR,AR_NAME,split_bundle,rmd_date) "+
+                                        "values ('"+h_vbeln+"','"+h_posnr+"','RETAIL','"+maxspl+"',NULL," +
+                                        "'"+h_arktx+"','"+nweight+"','"+usrHelper.getPlant()+"',current_timestamp,'"+params[0]+"','"+user+"_"+ver+"'," +
+                                        "current_timestamp,'"+user+"_"+ver+"','"+params[1]+"','"+h_unit+"','"+params[0]+"','"+h_wadatx+"','"+h_carlicense+"','"+h_documentid+"'," +
+                                        "'A','"+h_kunnr+"','"+h_ar_name+"',"+maxspl+",NULL)";
 
-                            String insrt = "insert into tbl_shipment_item (VBELN,POSNR,charge,bundle,grade,size,weight," +
-                                    "location,add_stamp,item_barcode,user_add,del_stamp,del_user,qty,unit,mat_code,WADAT," +
-                                    "carlicense,DocumentId,qa_grade,KUNNR,AR_NAME,split_bundle,rmd_date) "+
-                                    "values ('"+h_vbeln+"','"+h_posnr+"','"+rmd_charge+"','"+r_bundle+"','"+rmd_grade+"'," +
-                                    "'"+h_arktx+"','"+rmd_weight+"','ZUBB',current_timestamp,'"+params[0]+"','"+user+"_"+ver+"'," +
-                                    "current_timestamp,'"+user+"_"+ver+"','"+params[1]+"','"+h_unit+"','"+matcode+"','"+h_wadatx+"','"+h_carlicense+"','"+h_documentid+"'," +
-                                    "'"+rmd_qa_grade+"','"+h_kunnr+"','"+h_ar_name+"',"+maxspl+",'"+rmd_date+"')";
+                                PreparedStatement preparedStatement = con.prepareStatement(insrt);
+                                preparedStatement.executeUpdate();
+                                isSuccess=true ;
+                                z = "บันทึกเรียบร้อยแล้ว";
+                            }else{
+                                String insrt = "insert into tbl_shipment_item (VBELN,POSNR,charge,bundle,grade,size,weight," +
+                                        "location,add_stamp,item_barcode,user_add,del_stamp,del_user,qty,unit,mat_code,WADAT," +
+                                        "carlicense,DocumentId,qa_grade,KUNNR,AR_NAME,split_bundle,rmd_date) "+
+                                        "values ('"+h_vbeln+"','"+h_posnr+"','"+rmd_charge+"','"+r_bundle+"','"+rmd_grade+"'," +
+                                        "'"+h_arktx+"','"+rmd_weight+"','ZUBB',current_timestamp,'"+params[0]+"','"+user+"_"+ver+"'," +
+                                        "current_timestamp,'"+user+"_"+ver+"','"+params[1]+"','"+h_unit+"','"+matcode+"','"+h_wadatx+"','"+h_carlicense+"','"+h_documentid+"'," +
+                                        "'"+rmd_qa_grade+"','"+h_kunnr+"','"+h_ar_name+"',"+maxspl+",'"+rmd_date+"')";
 
-                            PreparedStatement preparedStatement = con.prepareStatement(insrt);
-                            preparedStatement.executeUpdate();
-                            isSuccess=true ;
-                            z = "บันทึกเรียบร้อยแล้ว";
+                                PreparedStatement preparedStatement = con.prepareStatement(insrt);
+                                preparedStatement.executeUpdate();
+                                isSuccess=true ;
+                                z = "บันทึกเรียบร้อยแล้ว";
+                            }
 
-                }
+                        }
 
             } catch (Exception ex) {
                 isSuccess = false;
@@ -548,8 +600,11 @@ public class AddProducts extends AppCompatActivity {
 
     public void onErrorDialog(int eDup , int eCar ,int notFound, int misMat, int nomat) {
         String msg = "";
+        if(scanresult==null || scanresult.equals("")){
+            scanresult = "PICK" ;
+        }
         if(eDup==0 && eCar==0 && notFound ==0 && misMat ==0 && nomat==0){
-            msg = itxt+"\n"+"Code "+scanresult;
+            msg = itxt+"\n\n"+"Code "+scanresult;
         }
             if(eCar == 1){
                 msg = "รถยังไม่ได้ชั่งเข้า ไม่สามารถทำรายการได้";
@@ -570,7 +625,6 @@ public class AddProducts extends AppCompatActivity {
                     }
                 }
             }
-
 
         new AlertDialog.Builder(context)
 
@@ -610,6 +664,8 @@ public class AddProducts extends AppCompatActivity {
             String unit = "";
             int start = stext.trim().indexOf("-")+1;
             int end = stext.trim().length();
+
+
 
             SpannableString svbeln = new SpannableString(stext.trim());
             //SpannableStringBuilder  bvblen = new SpannableStringBuilder(stext);
@@ -723,9 +779,9 @@ public class AddProducts extends AppCompatActivity {
                 @Override
                 public boolean onItemLongClick(AdapterView<?> arg0, View arg1,
                                                int arg2, long arg3) {
-                    /*if (getErCar()!=0) {
+                    if (getErCar()!=0) {
                         onErrorDialog(0,getErCar(),0,0,0);
-                    }else {*/
+                    }else {
                         HashMap<String, Object> obj = (HashMap<String, Object>) ADA
                                 .getItem(arg2);
                         String qhn = (String) obj.get("charge");
@@ -737,13 +793,17 @@ public class AddProducts extends AppCompatActivity {
                         arg1.setSelected(true);
 
                         adjQty(qhn, qqty);
-                   // }
+                    }
                     return true;
                 }
             });
 
             tv_sumbun.setText(""+nf.format(sumcount)+" มัด");
             tv_sumqty.setText(""+nf.format(sumqty)+" เส้น");
+
+            //Toast.makeText(AddProducts.this,getErCar(),Toast.LENGTH_SHORT).show();
+
+            //Log.d("ercar", String.valueOf(getErCar()));
 
             pbbar.setVisibility(View.GONE);
 
@@ -764,7 +824,7 @@ public class AddProducts extends AppCompatActivity {
                         where = "where vbeln = '" + params[0] + "' and posnr = '" + params[1] + "' ";
                     }
 
-                    String headqry = "select convert(nvarchar(20),cast(wadat as datetime),103) as wadat2 ,* from vw_wsum_p8 " + where ;
+                    String headqry = "select convert(nvarchar(20),cast(wadat as datetime),103) as wadat2 ,*,isnull(NTGEW,0) as NTGEWx from vw_wsum_p8 " + where ;
                     PreparedStatement hps = con.prepareStatement(headqry);
                     ResultSet hrs = hps.executeQuery();
 
@@ -789,6 +849,7 @@ public class AddProducts extends AppCompatActivity {
                         h_limit = hrs.getInt("LFIMG");
                         h_unit = hrs.getString("unit");
                         h_rs = hrs.getInt("rs");
+                        h_ntgew = hrs.getInt("NTGEWx");
 
                     }
                     String itemquery = "SELECT item_id,charge,bundle,qty,weight,qa_grade,remark from tbl_shipment_item " + where+ " order by add_stamp desc ";
@@ -831,6 +892,200 @@ public class AddProducts extends AppCompatActivity {
 
             return z;
         }
+    }
+
+    public class FetchStock extends AsyncTask<String, String, String> {
+
+        Boolean isSuccess =false;
+        String z = "";
+        String Fmat = "";
+
+        //TODO >>>>>>>>>>>>>>>>>>>>> haha <<<<<<<<<<<<<<<<<<<<
+        @Override
+        protected void onPreExecute() {
+
+
+
+
+            pbbar.setVisibility(View.VISIBLE);
+
+        }
+
+        @Override
+        protected void onPostExecute(String r) {
+
+            if(isSuccess==true){
+                stockPick(Fmat,userPlant);
+            }else{
+
+            }
+            pbbar.setVisibility(View.GONE);
+
+        }
+
+        @Override
+        protected String doInBackground(String... params) {
+            try {
+
+                Connection con = connectionClass.CONN();
+                if (con == null) {
+                    z = "Error in connection with SQL server";
+                } else {
+                    String plant ="";
+                    switch (params[1]){
+                        case "ZUBB" : plant = " and werks in ('1010','9010')";
+                            break;
+                        case "SPN" : plant = " and werks in ('1050','9050')";
+                            break;
+                        case "SPS" : plant = " and werks in ('1040','9040')";
+                            break;
+                        case "OPS" : plant = " and werks in ('2010','9060','1020','9020')";
+                            break;
+                    }
+
+                    String Sql = "select MATNR,WERKS,LGORT,CHARG,CLABS,CRETM,CINSM,rmd_charge,rmd_bundle,(CLABS+CRETM+CINSM) as qty from vw_hstock where matnr = '"+params[0].trim()+"' "+plant;
+
+                    PreparedStatement ps = con.prepareStatement(Sql);
+                    ResultSet rs = ps.executeQuery();
+
+                    stocklist.clear();
+                    while (rs.next()) {
+
+                        Map<String, String> datanums = new HashMap<String, String>();
+                        datanums.put("MATNR", rs.getString("MATNR"));
+                        datanums.put("LGORT", rs.getString("LGORT"));
+                        datanums.put("CHARG", rs.getString("CHARG"));
+                        datanums.put("qty", rs.getString("qty"));
+                        datanums.put("rmd_charge", rs.getString("rmd_charge"));
+                        datanums.put("rmd_bundle", rs.getString("rmd_bundle"));
+
+                        stocklist.add(datanums);
+
+                    }
+
+                    Fmat = params[0].trim();
+                    isSuccess =true;
+                }
+
+            } catch (Exception ex) {
+
+                z = ex.getMessage().toString();
+                isSuccess =false;
+
+            }
+            return z;
+        }
+    }
+
+    public void ManaulDialog() {
+
+        final Dialog mdialog = new Dialog(AddProducts.this);
+        mdialog.requestWindowFeature(Window.FEATURE_NO_TITLE);
+        mdialog.setContentView(R.layout.dialog_manaul);
+        mdialog.setCancelable(true);
+        mdialog.setTitle("คีย์ข้อมูล");
+
+        TextView marktx;
+        Button mbtnSave,mbtnCan;
+        mbtnCan = (Button) mdialog.findViewById(R.id.mbtnCan);
+        mbtnSave = (Button) mdialog.findViewById(R.id.mbtnSave);
+        marktx =(TextView) mdialog.findViewById(R.id.marktx);
+        marktx.setText(h_arktx);
+
+        mbtnSave.setOnClickListener(new View.OnClickListener() {
+            EditText edHn = (EditText) mdialog.findViewById(R.id.ed_hn);
+            EditText edBn = (EditText) mdialog.findViewById(R.id.ed_bun);
+            EditText edQty = (EditText) mdialog.findViewById(R.id.ed_qty);
+
+            public void onClick(View v) {
+
+                PickInsert pickI = new PickInsert();
+                pickI.execute(h_matnr,edQty.getText().toString().trim(),edHn.getText().toString(),edBn.getText().toString().trim(),"MN");
+
+                mdialog.dismiss();
+            }
+        });
+        mbtnCan.setOnClickListener(new View.OnClickListener() {
+
+            public void onClick(View v) {
+
+                mdialog.dismiss();
+            }
+        });
+
+        mdialog.show();
+
+    }
+
+    public void stockPick(String pickmat, String pickplant){
+
+        final Dialog pickdialog = new Dialog(AddProducts.this);
+        pickdialog.requestWindowFeature(Window.FEATURE_NO_TITLE);
+        pickdialog.setContentView(R.layout.dialog_stockpick);
+
+        pickdialog.setCancelable(true);
+        TextView stock_arktx;
+        ListView liststock;
+        Button keyBtn;
+
+        stock_arktx = (TextView)pickdialog.findViewById(R.id.stock_arktx);
+        liststock   = (ListView)pickdialog.findViewById(R.id.liststock);
+        keyBtn = (Button)pickdialog.findViewById(R.id.keyBtn);
+
+        stock_arktx.setText(h_arktx);
+
+        String[] from = {"LGORT","CHARG","qty"};
+        int[] views = {R.id.stock_loc,R.id.stock_batch ,R.id.stock_qty  };
+            final SimpleAdapter AdapVbeln = new SimpleAdapter(AddProducts.this,
+                stocklist, R.layout.adp_list_stock, from,
+                views){
+            @Override
+            public View getView(final int position, View convertView, ViewGroup parent) {
+                View view = super.getView(position, convertView, parent);
+
+                return view;
+            }
+        };
+
+        liststock.setAdapter(AdapVbeln);
+        liststock.setOnItemClickListener(new AdapterView.OnItemClickListener() {
+
+            @Override
+            public void onItemClick(AdapterView<?> arg0, View arg1,
+                                    int arg2, long arg3) {
+                HashMap<String, Object> obj = (HashMap<String, Object>) AdapVbeln
+                        .getItem(arg2);
+
+                String pickqty = (String) obj.get("qty");
+                String pickmatnr = (String) obj.get("MATNR");
+                String pick_rmd_charge= (String) obj.get("rmd_charge");
+                String pick_rmd_bundle = (String) obj.get("rmd_bundle");
+
+                Animation animation1 = new AlphaAnimation(0.3f, 1.0f);
+                animation1.setDuration(2000);
+                arg1.startAnimation(animation1);
+
+                PickInsert pickI = new PickInsert();
+                pickI.execute(pickmatnr,pickqty,pick_rmd_charge,pick_rmd_bundle,"ST");
+
+                pickdialog.dismiss();
+
+            }
+
+        });
+
+        keyBtn.setOnClickListener(new View.OnClickListener() {
+
+
+            public void onClick(View v) {
+                ManaulDialog();
+                pickdialog.dismiss();
+            }
+        });
+
+
+        pickdialog.show();
+
     }
 
     public void adjQty(String hn,int qty){
@@ -876,7 +1131,7 @@ public class AddProducts extends AppCompatActivity {
 
     }
 
-    public void splitInsert(String hn,int qty){
+    public void splitInsert(String hn, int qty, final Boolean retail){
 
         final Dialog spltdialog = new Dialog(AddProducts.this);
         spltdialog.requestWindowFeature(Window.FEATURE_NO_TITLE);
@@ -903,8 +1158,14 @@ public class AddProducts extends AppCompatActivity {
             public void onClick(View v) {
                 EditText eqty = (EditText) spltdialog.findViewById(R.id.eqty);
 
-                SplitScan spScan = new SplitScan();
-                spScan.execute(bar_id,eqty.getText().toString().trim());
+                if(retail==true){
+                    SplitScan spScan = new SplitScan();
+                    spScan.execute(scanresult,eqty.getText().toString().trim(),"R");
+                }else{
+                    SplitScan spScan = new SplitScan();
+                    spScan.execute(bar_id,eqty.getText().toString().trim(),"W");
+                }
+
 
                 spltdialog.dismiss();
                 split_flag = false;
@@ -930,6 +1191,9 @@ public class AddProducts extends AppCompatActivity {
         spltdialog.show();
 
     }
+
+
+
 
     public class AdjItem extends AsyncTask<String, String, String> {
 
@@ -978,8 +1242,6 @@ public class AddProducts extends AppCompatActivity {
         }
     }
 
-
-
     public class DeletePro extends AsyncTask<String, String, String> {
 
         String z = "";
@@ -1019,6 +1281,112 @@ public class AddProducts extends AppCompatActivity {
             } catch (Exception ex) {
                 isSuccess = false;
                 z = "ERROR DEL แจ้ง IT 1203";
+            }
+
+            return z;
+        }
+    }
+
+    public class PickInsert extends AsyncTask<String, String, String> {
+
+        String z = "";
+        Boolean isSuccess = false;
+
+        @Override
+        protected void onPreExecute() {
+            pbbar.setVisibility(View.VISIBLE);
+        }
+
+        @Override
+        protected void onPostExecute(String r) {
+
+
+            if(isSuccess==true) {
+                FillList fillList = new FillList();
+                fillList.execute(g_vbeln.trim(),g_posnr.trim());
+                Toast.makeText(AddProducts.this, r, Toast.LENGTH_SHORT).show();
+            }else{
+                onErrorDialog(getErDup(),getErCar(),getErNf(),getErMm(),getErNm());
+            }
+            pbbar.setVisibility(View.GONE);
+        }
+
+        @Override
+        protected String doInBackground(String... params) {
+
+            try {
+                Connection con = connectionClass.CONN();
+                if (con == null) {
+                    z = "Error in connection with SQL server";
+                } else {
+
+                    int cqty = Integer.parseInt(params[1]);
+                    int calweight = (h_ntgew/h_limit)*cqty;
+                    String cgrade ="";
+
+                    switch (params[0].substring(3,4)){
+                        case "1" : cgrade = "A";
+                            break;
+                        case "2" : cgrade = "A-";
+                            break;
+                        case "3" : cgrade = "A2";
+                            break;
+                        case "4" : cgrade = "Y1";
+                            break;
+                    }   //pickI.execute(pickmatnr,pickqty,pick_rmd_charge,pick_rmd_bundle);
+                        //                  0        1              2               3
+                    setErDup(0);/*setErCar(0);*/setErNm(0);setErMm(0);setErNf(0);
+
+                    String checkDup = "Select top 1 * from tbl_shipment_item where charge = '" + params[2].trim() + "' and bundle  = '"+params[3].trim()+"' and mat_code = '"+params[0].trim()+"' and  split_bundle = 0 and left(vbeln,1) <> '3'  order by add_stamp desc  ";
+                    PreparedStatement cd = con.prepareStatement(checkDup);
+                    ResultSet cdps = cd.executeQuery();
+
+                    String cDup ="";
+                    while (cdps.next()) {
+                        dBar_id = cdps.getString("item_barcode");
+                        dCharge = cdps.getString("charge");
+                        dBundle = cdps.getString("bundle");
+                        dUser = cdps.getString("user_add");
+                        dStamp = cdps.getString("add_stamp");
+                        dVbeln = cdps.getString("vbeln");
+                        dSize = cdps.getString("size");
+                        cDup = cdps.getString("item_barcode");
+                    }
+
+                    if (cDup.equals("")) {
+                        setErDup(0);
+                    } else {
+                        setErDup(1);
+                    }
+
+                    //Log.d("params0", params[0]);
+
+                    if (getErDup() == 0 && getErCar()==0 && getErNf() == 0 && getErMm() == 0 && getErNm() == 0) {
+
+                    String pinsrt = "insert into tbl_shipment_item (VBELN,POSNR,charge,bundle,grade,size,weight," +
+                            "location,add_stamp,item_barcode,user_add,del_stamp,del_user,qty,unit,mat_code,WADAT," +
+                            "carlicense,DocumentId,qa_grade,KUNNR,AR_NAME,split_bundle,rmd_date) " +
+                            "values ('" + h_vbeln + "','" + h_posnr + "','" +params[2]+"','" + params[3] + "',NULL," +
+                            "'" + h_arktx + "','" + calweight + "','" + usrHelper.getPlant() + "',current_timestamp,'"+params[4]+"'+''+convert(nvarchar(30),(select max(item_id)+1 from tbl_shipment_item)),'" + user + "_" + ver + "'," +
+                            "NULL,NULL,'" + params[1] + "','" + h_unit + "','" + h_matnr + "','" + h_wadatx + "','" + h_carlicense + "','" + h_documentid + "'," +
+                            "'" + cgrade + "','" + h_kunnr + "','" + h_ar_name + "',0,NULL)";
+
+                    PreparedStatement preparedStatement = con.prepareStatement(pinsrt);
+                    preparedStatement.executeUpdate();
+                    z = "บันทึกสำเร็จ";
+                    isSuccess = true;
+                    }
+                    else{
+                        isSuccess = false;
+
+                    }
+                }
+
+
+            } catch (Exception ex) {
+                isSuccess = false;
+                itxt = ex.getMessage().toString();
+
             }
 
             return z;

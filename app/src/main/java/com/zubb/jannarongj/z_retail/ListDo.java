@@ -36,14 +36,32 @@ import java.util.Map;
 public class ListDo extends AppCompatActivity {
     UserHelper usrHelper ;
     ConnectionClass connectionClass;
-    ToggleButton tgg1, tgg2, tgg3, tgg4,tgg5;
+    ToggleButton tgg1, tgg2, tgg3, tgg4;
     ProgressBar pbbar;
     ListView lstdo;
     EditText searchBox;
-    String gs= "";
-    Button btnSearch, btnU, btnAll, btnOut, btnDone;
-    // String tg = " WADAT = CONVERT(VARCHAR(10), getdate(), 112) and DocumentId is not null and INTIME = OUTTIME order by vbeln" ;
-    String tg = " WADAT = CONVERT(VARCHAR(10), getdate(), 112) and INTIME is not null and INTIME = OUTTIME  order by vbeln" ;
+    String plant ;
+
+    public String getFilter() {
+        return filter;
+    }
+
+    public void setFilter(String filter) {
+        this.filter = filter;
+    }
+
+    static String  filter = "";
+
+    public static String getFilvbeln() {
+        return filvbeln;
+    }
+
+    public static void setFilvbeln(String filvbeln) {
+        ListDo.filvbeln = filvbeln;
+    }
+
+    static String  filvbeln = "";
+    Button btnSearch ;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -65,26 +83,29 @@ public class ListDo extends AppCompatActivity {
         tgg2 = (ToggleButton) findViewById(R.id.tgg2);
         tgg3 = (ToggleButton) findViewById(R.id.tgg3);
         tgg4 = (ToggleButton) findViewById(R.id.tgg4);
-        tgg5 = (ToggleButton) findViewById(R.id.tgg5);
+
         tgg1.setText(null);
         tgg2.setText(null);
         tgg3.setText(null);
         tgg4.setText(null);
-        tgg5.setText(null);
+
         tgg1.setTextOn(null);
         tgg2.setTextOn(null);
         tgg3.setTextOn(null);
         tgg4.setTextOn(null);
-        tgg5.setTextOn(null);
+
         tgg1.setTextOff(null);
         tgg2.setTextOff(null);
         tgg3.setTextOff(null);
         tgg4.setTextOff(null);
-        tgg5.setTextOff(null);
 
+        plant = usrHelper.getPlant();
 
+        setFilter("1");
+        setFilvbeln("");
         FillList fillList = new FillList();
-        fillList.execute("");
+        fillList.execute(getFilter(),getFilvbeln(),plant);
+        tgg1.setChecked(true);
 
         btnSearch.setOnClickListener(new View.OnClickListener() {
             String getSearch;
@@ -98,9 +119,10 @@ public class ListDo extends AppCompatActivity {
 
                         if (s.toString().trim().length() == 0) {
                             getSearch = searchBox.getText().toString();
-                            setSB(getSearch);
+                            setFilvbeln(getSearch);
+
                             FillList fillList = new FillList();
-                            fillList.execute("");
+                            fillList.execute(getFilter(),getFilvbeln(),plant);
 
                             //  Toast.makeText(ListDo.this, getTG(), Toast.LENGTH_SHORT).show();
                         } else {
@@ -121,36 +143,27 @@ public class ListDo extends AppCompatActivity {
                     }
                 });
 
-                getSearch = searchBox.getText().toString();
-                setSB(getSearch);
+                getSearch = searchBox.getText().toString().trim();
+                setFilvbeln(getSearch);
                 FillList fillList = new FillList();
-                fillList.execute("");
-                // Toast.makeText(ListDo.this, getTG(), Toast.LENGTH_SHORT).show();
+                fillList.execute(getFilter(),getFilvbeln(),plant);
+
 
             }
         });
 
-
-        tgg1.setChecked(true);
         tgg1.setOnClickListener(new View.OnClickListener() {
 
             @Override
             public void onClick(View v) {
 
                 if (tgg1.isChecked()) {
-
-                    // setTG(" WADAT = CONVERT(VARCHAR(10), getdate(), 112) and DocumentId is not null and INTIME = OUTTIME and INTIME is not null and OUTTIME is not null order by vbeln");
-                    setTG(" WADAT = CONVERT(VARCHAR(10), getdate(), 112) and INTIME is not null and INTIME = OUTTIME  order by vbeln");
-
+                    setFilter("1");
                     FillList fillList = new FillList();
-                    fillList.execute("");
+                    fillList.execute(getFilter(),getFilvbeln(),plant);
                     tgg2.setChecked(false);
                     tgg3.setChecked(false);
                     tgg4.setChecked(false);
-                    tgg5.setChecked(false);
-
-                    //  Toast.makeText(ListDo.this, getTG(), Toast.LENGTH_SHORT).show();
-
                 }
             }
         });
@@ -161,16 +174,12 @@ public class ListDo extends AppCompatActivity {
             public void onClick(View v) {
 
                 if (tgg2.isChecked()) {
-
-                    setTG(" WADAT = CONVERT(VARCHAR(10), getdate(), 112) and sscan >= 1 order by vbeln");
-                    //setTG("group by WADAT,VBELN,AR_NAME,KUNNR,CARLICENSE,INTIME,POSNR,DocumentId,wsum,asum,sqty,sscan,OUTTIME having  sscan >= 1 order by vbeln ");
+                    setFilter("2");
                     FillList fillList = new FillList();
-                    fillList.execute("");
+                    fillList.execute(getFilter(),getFilvbeln(),plant);
                     tgg1.setChecked(false);
                     tgg3.setChecked(false);
                     tgg4.setChecked(false);
-                    tgg5.setChecked(false);
-                    //  Toast.makeText(ListDo.this, getTG(), Toast.LENGTH_SHORT).show();
                 }
             }
         });
@@ -180,16 +189,12 @@ public class ListDo extends AppCompatActivity {
             public void onClick(View v) {
 
                 if (tgg3.isChecked()) {
-                    setTG(" WADAT = CONVERT(VARCHAR(10), getdate(), 112) and OUTTIME is not null and OUTTIME > INTIME order by vbeln");
-
+                    setFilter("3");
                     FillList fillList = new FillList();
-                    fillList.execute("");
+                    fillList.execute(getFilter(),getFilvbeln(),plant);
                     tgg1.setChecked(false);
                     tgg2.setChecked(false);
                     tgg4.setChecked(false);
-                    tgg5.setChecked(false);
-                    // Toast.makeText(ListDo.this, getTG(), Toast.LENGTH_SHORT).show();
-
                 }
             }
         });
@@ -199,35 +204,12 @@ public class ListDo extends AppCompatActivity {
             public void onClick(View v) {
 
                 if (tgg4.isChecked()) {
-                    setTG(" WADAT = CONVERT(VARCHAR(10), getdate(), 112) and vbeln is not null  order by vbeln");
-
+                    setFilter("4");
                     FillList fillList = new FillList();
-                    fillList.execute("");
+                    fillList.execute(getFilter(),getFilvbeln(),plant);
                     tgg1.setChecked(false);
                     tgg2.setChecked(false);
                     tgg3.setChecked(false);
-                    tgg5.setChecked(false);
-                    // Toast.makeText(ListDo.this, getTG(), Toast.LENGTH_SHORT).show();
-
-                }
-            }
-        });
-        tgg5.setOnClickListener(new View.OnClickListener() {
-
-            @Override
-            public void onClick(View v) {
-
-                if (tgg5.isChecked()) {
-                    setTG(" WADAT > CONVERT(VARCHAR(10), getdate() - 4 , 112) and  WADAT < CONVERT(VARCHAR(10), getdate() +2 , 112)  and vbeln is not null  order by wadat desc");
-
-                    FillList fillList = new FillList();
-                    fillList.execute("");
-                    tgg1.setChecked(false);
-                    tgg2.setChecked(false);
-                    tgg3.setChecked(false);
-                    tgg4.setChecked(false);
-                    // Toast.makeText(ListDo.this, getTG(), Toast.LENGTH_SHORT).show();
-
                 }
             }
         });
@@ -248,25 +230,26 @@ public class ListDo extends AppCompatActivity {
 
         @Override
         protected void onPostExecute(String r) {
-
+            //Log.d("Zs",z);
             pbbar.setVisibility(View.GONE);
             Toast.makeText(ListDo.this, r, Toast.LENGTH_SHORT).show();
-            Log.d("dolist",dolist.toString());
+           // Toast.makeText(ListDo.this, "getfil : "+getFilter()+"\ngetvbeln : "+getFilvbeln(), Toast.LENGTH_SHORT).show();
 
-
-            String[] from = {"A","D","B","C","Z"};
-            int[] views = {R.id.lblmatcode, R.id.lblposnr, R.id.lbldesc, R.id.llblamout};
+            String[] from = {"AR_NAME","VBELN","CARLICENSE"};
+            int[] views = {R.id.ar_name,R.id.vbeln,R.id.carlicense};
             final SimpleAdapter ADA = new SimpleAdapter(ListDo.this,
-                    dolist, R.layout.lstdo, from,
+                    dolist, R.layout.adp_list_ar, from,
                     views){
                 @Override
                 public View getView(final int position, View convertView, ViewGroup parent) {
                     View view = super.getView(position, convertView, parent);
-                    LinearLayout lnx = (LinearLayout) view.findViewById(R.id.lnx);
+                    //LinearLayout lnx = (LinearLayout) view.findViewById(R.id.lnx);
+
                     //int lx = Integer.parseInt(dolist.get(position).get("sscan"));
-                    if(!"0".equals(dolist.get(position).get("sscan"))){
+                    /*if(!"0".equals(dolist.get(position).get("sscan"))){
                         lnx.setBackgroundColor(Color.parseColor("#CCC4FFE0"));
-                    }
+                    }*/
+
                     return view;
                 }
             };
@@ -278,22 +261,16 @@ public class ListDo extends AppCompatActivity {
                                         int arg2, long arg3) {
                     HashMap<String, Object> obj = (HashMap<String, Object>) ADA
                             .getItem(arg2);
-                    String lst_do_di = (String) obj.get("A");
-                    String lst_posnr = (String) obj.get("D");
-                    //String lst_wadat = (String) obj.get("E");
-                    //String lst_car1 = (String) obj.get("C");
-                    //String lst_doc_id1 = (String) obj.get("DocID");
-                    Intent i = new Intent(ListDo.this, AddProducts.class);
-                    i.putExtra("vbeln", lst_do_di);
-                    i.putExtra("posnr", lst_posnr);
-                   /* i.putExtra("doc_date", lst_wadat);
-                    i.putExtra("doc_car", lst_car1);
-                    i.putExtra("doc_id", lst_doc_id1);*/
+                    String lst_vbeln = (String) obj.get("VBELN");
+
+                    Intent i = new Intent(ListDo.this, ar_list.class);
+                    i.putExtra("vbeln", lst_vbeln);
 
                     startActivity(i);
 
                 }
             });
+
 
         }
 
@@ -306,28 +283,63 @@ public class ListDo extends AppCompatActivity {
                 if (con == null) {
                     z = "Error in connection with SQL server";
                 } else {
-                    //     String query = "select * from vw_shipmentplan_zubb where " + getTG() + " ";
-                    String query = "select VBELN,AR_NAME,CARLICENSE,POSNR,WADAT,DocumentId,sscan from vw_wsum_p8 where " + getTG() + " ";
+
+                    String where = "";
+                    String having = "";
+                    String vbeln = "";
+                    String plant = "";
+
+                    switch (params[2]){
+                        case "ZUBB" : plant = " and s.werks in ('1010','9010')  ";
+                            break;
+                        case "SPN" : plant = " and s.werks in ('1050','9050') ";
+                            break;
+                        case "SPS" : plant = " and s.werks in ('1040','9040') ";
+                            break;
+                        case "OPS" : plant = " and s.werks in ('2010','9060','1020','9020') ";
+                            break;
+                    }
+
+                    if(params[1]==null || params[1].equals("")){
+                        vbeln = "";
+                    }else{
+                        vbeln = " and s.vbeln like '%"+params[1].trim()+"%' ";
+                    }
+
+                    switch (params[0]){
+                        case "1" : where = " and s.INTIME = s.OUTTIME  and  s.INTIME is not null and s.OUTTIME is not null and s.wadat = convert(nvarchar(22),getdate(),112) ";
+                            break;
+                        case "2" : having = " having sum(i.qty) >  0  and s.wadat = convert(nvarchar(22),getdate(),112) ";
+                            break;
+                        case "3" : where = " and s.INTIME <> s.OUTTIME  and s.INTIME is not null and s.OUTTIME is not null and s.wadat = convert(nvarchar(22),getdate(),112) ";
+                            break;
+                        case "4" : where = "";
+                            break;
+
+                    }
+
+                    String query = "SELECT s.WADAT,s.VBELN,s.AR_NAME,s.CARLICENSE " +
+                            "FROM gr_shipmentplan3 as s LEFT JOIN dbo.tbl_shipment_item as i " +
+                            "on i.VBELN = s.VBELN and i.POSNR = s.POSNR " +
+                            "where  s.VBELN is not null and left(s.MATNR,2) not in ('BL','SC') " +plant+ where+ " " + vbeln +
+                            "group by s.VBELN,s.AR_NAME,s.CARLICENSE,s.WADAT " +having+
+                            "order by 1 desc ";
 
                     PreparedStatement ps = con.prepareStatement(query);
                     ResultSet rs = ps.executeQuery();
                     dolist.clear();
-                    ArrayList<String> data1 = new ArrayList<String>();
                     while (rs.next()) {
                         Map<String, String> datanum = new HashMap<String, String>();
-                        datanum.put("A", rs.getString("VBELN"));
-                        datanum.put("B", rs.getString("AR_NAME"));
-                        datanum.put("C", rs.getString("CARLICENSE"));
-                        datanum.put("D", rs.getString("POSNR"));
-                        datanum.put("E", rs.getString("WADAT"));
-                       // datanum.put("st", rs.getString("dstat"));
-                        datanum.put("DocID", rs.getString("DocumentId"));
-                        datanum.put("sscan", rs.getString("sscan"));
+                        datanum.put("WADAT", rs.getString("WADAT"));
+                        datanum.put("VBELN", rs.getString("VBELN"));
+                        datanum.put("AR_NAME", rs.getString("AR_NAME"));
+                        datanum.put("CARLICENSE", rs.getString("CARLICENSE"));
 
                         dolist.add(datanum);
                     }
 
                     z = "Success";
+                    //z = query;
                 }
             } catch (Exception ex) {
                 z = ex.getMessage();//"Error retrieving data from table";
@@ -336,33 +348,6 @@ public class ListDo extends AppCompatActivity {
             return z;
         }
     }
-
-   /* @Override
-    public void onResume(){
-
-        super.onResume();
-
-        FillList fillList = new FillList();
-        fillList.execute("");
-
-    }*/
-
-    public void setTG(String tg){
-        this.tg = tg ;
-    }
-    public void setSB(String gs){
-        if(gs.equals("")){
-            this.gs = "" ;
-        }else{
-            this.gs = "VBELN like '%"+gs+"%' and " ;
-        }
-    }
-    public String getTG(){
-        String stSearch = gs+" "+tg;
-        return stSearch;
-    }
-
-
 
 
 }

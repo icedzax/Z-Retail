@@ -23,7 +23,7 @@ import java.sql.ResultSet;
 public class Login extends AppCompatActivity {
 
     ConnectionClass connectionClass;
-    String username ,id,gPass,gver;
+    String username ,id,gPass,gver,plant,level;
     UserHelper usrHelper ;
     Button btnLogin ,b1,b2,b3,b4,b5,b6,b7,b8,b9,b0,bd;
     ProgressBar pbbar;
@@ -156,7 +156,7 @@ public class Login extends AppCompatActivity {
 
             pbbar.setVisibility(View.GONE);
             if (gPass.equals(id)){
-                usrHelper.createSession(username,id);
+                usrHelper.createSession(username,id,plant,level);
                 Intent i = new Intent(Login.this, ListDo.class);
                 startActivity(i);
                 finish();
@@ -190,6 +190,8 @@ public class Login extends AppCompatActivity {
 
                         username = bs.getString("name");
                         id = bs.getString("Id");
+                        plant = bs.getString("plant");
+                        level = bs.getString("lv");
 
                     }
                     isSuccess = true;

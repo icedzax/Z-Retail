@@ -22,12 +22,14 @@ public class UserHelper {
         this.editor = sharedPerfs.edit();
     }
 
-    public void createSession(String sUserName, String sPassword) {
+    public void createSession(String sUserName, String sPassword, String sPlant ,String sLevel) {
         vers = new Version();
         editor.putBoolean("LoginStatus", true);
         editor.putString("Username", sUserName);
         editor.putString("Password", sPassword);
         editor.putString("Version", vers.Version.trim());
+        editor.putString("Plant", sPlant);
+        editor.putString("Level", sLevel);
         editor.commit();
 
     }
@@ -48,4 +50,12 @@ public class UserHelper {
     public String getVer() {
         return sharedPerfs.getString("Version", null);
     }
+    public String getPlant() {
+        return sharedPerfs.getString("Plant", null);
+    }
+    public String getLevel() {
+        return sharedPerfs.getString("Level", null);
+    }
+
+
 }
