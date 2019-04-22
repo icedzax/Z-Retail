@@ -3,12 +3,15 @@ package com.zubb.jannarongj.z_retail;
 import android.app.AlertDialog;
 import android.content.DialogInterface;
 import android.content.Intent;
+
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.support.design.widget.FloatingActionButton;
 import android.support.design.widget.Snackbar;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
+import android.text.format.Formatter;
+import android.util.Log;
 import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
@@ -162,6 +165,7 @@ public class Login extends AppCompatActivity {
                 finish();
             }else{
                 if(isSuccess==true){
+
                     Toast.makeText(Login.this,"รหัสไม่ถูกต้อง",Toast.LENGTH_LONG).show();
                     izeText.setText("");
                 }else{

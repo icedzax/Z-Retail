@@ -3,6 +3,7 @@ package com.zubb.jannarongj.z_retail;
 import android.app.ProgressDialog;
 import android.content.Intent;
 import android.net.Uri;
+import android.net.wifi.WifiManager;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.os.Environment;
@@ -10,6 +11,7 @@ import android.support.design.widget.FloatingActionButton;
 import android.support.design.widget.Snackbar;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
+import android.text.format.Formatter;
 import android.util.Log;
 import android.view.View;
 import android.widget.Button;
@@ -28,9 +30,9 @@ import java.sql.ResultSet;
 
 public class CheckVersion extends AppCompatActivity {
 
-    ProgressBar pbbar;ProgressDialog bar ;
+    ProgressBar pbbar; ProgressDialog bar;
     ConnectionClass connectionClass;
-    Version vers ;
+    Version vers;
     String app_name,capp_ver,fapp_verion;
     TextView cur_app,last_app;
     Button btnUp;
@@ -39,8 +41,22 @@ public class CheckVersion extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_check_version);
+
+        WifiManager wm = (WifiManager) getSystemService(WIFI_SERVICE);
+        String ip = Formatter.formatIpAddress(wm.getConnectionInfo().getIpAddress());
+        //Log.d("ip",ip.substring(8,11));
+
         vers = new Version();
         connectionClass = new ConnectionClass();
+
+        if(ip!= null && ip.substring(8,11).equals("116")){
+            connectionClass.setUip("192.168.116.222");
+            connectionClass.setUpass("sipco77");
+        }else {
+            connectionClass.setUip("192.168.100.222");
+            connectionClass.setUpass("");
+        }
+
         pbbar = (ProgressBar) findViewById(R.id.pbbar);
         cur_app = (TextView) findViewById(R.id.cur_app);
         last_app = (TextView) findViewById(R.id.last_app);
@@ -92,6 +108,7 @@ public class CheckVersion extends AppCompatActivity {
                     finish();
                 }else{
                     getUpdate();
+
                 }
             }else{
 

@@ -1,7 +1,9 @@
 package com.zubb.jannarongj.z_retail;
 
 import android.annotation.SuppressLint;
+import android.net.wifi.WifiManager;
 import android.os.StrictMode;
+import android.text.format.Formatter;
 import android.util.Log;
 
 import java.sql.Connection;
@@ -13,11 +15,33 @@ import java.sql.SQLException;
  */
 public class ConnectionClass {
 
+    public static String getUip() {
+        return uip;
+    }
+
+    public static void setUip(String uip) {
+        ConnectionClass.uip = uip;
+    }
+
+    public static String getUpass() {
+        return upass;
+    }
+
+    public static void setUpass(String upass) {
+        ConnectionClass.upass = upass;
+    }
+
+    public static String uip ;
+    public static String upass ;
+
+
     String ip = "192.168.100.222";
     String classs = "net.sourceforge.jtds.jdbc.Driver";
     String db = "PP";
     String un = "sa";
     String password = "";
+
+
 
     @SuppressLint("NewApi")
     public Connection CONN() {
@@ -31,9 +55,9 @@ public class ConnectionClass {
         try {
 
             Class.forName(classs);
-            ConnURL = "jdbc:jtds:sqlserver://" + ip + ";"
+            ConnURL = "jdbc:jtds:sqlserver://" + getUip() + ";"
                     + "databaseName=" + db + ";user=" + un + ";password="
-                    + password + ";";
+                    + getUpass() + ";";
             conn = DriverManager.getConnection(ConnURL);
         } catch (SQLException se) {
             Log.e("ERROR", se.getMessage());

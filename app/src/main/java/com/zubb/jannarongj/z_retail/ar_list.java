@@ -11,6 +11,8 @@ import android.support.design.widget.FloatingActionButton;
 import android.support.design.widget.Snackbar;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
+import android.text.Editable;
+import android.text.TextWatcher;
 import android.util.Log;
 import android.view.ContextThemeWrapper;
 
@@ -41,11 +43,13 @@ public class ar_list extends AppCompatActivity {
 
     UserHelper usrHelper ;
     ConnectionClass connectionClass;
+    Line sLine ;
     ProgressBar pbbar;
     ListView list_vbeln ;
-    Button q_btn_save;
+    Button q_btn_save,reqBtn;
+    EditText q_lfill ;
     TextView kunnr,vbeln,carlicense,q_remark,q_lock;
-    String h_kunnr,h_vbeln,h_carlicense,g_vbeln,h_weno,h_matnr,h_arktx,h_documentid,h_lfimg,h_unit;
+    String h_kunnr,h_vbeln,h_carlicense,g_vbeln,h_matnr,h_arktx,h_documentid,h_lfimg,h_unit,h_divqty;
     String l = "";
     String rm ="";
 
@@ -72,6 +76,7 @@ public class ar_list extends AppCompatActivity {
         }
 
 
+        reqBtn =(Button)findViewById(R.id.reqBtn);
         kunnr = (TextView)findViewById(R.id.kunnr);
         vbeln = (TextView)findViewById(R.id.vbeln);
         carlicense = (TextView)findViewById(R.id.carlicense);
@@ -80,12 +85,19 @@ public class ar_list extends AppCompatActivity {
         list_vbeln = (ListView)findViewById(R.id.lvb);
         usrHelper = new UserHelper(this);
         connectionClass = new ConnectionClass();
+        sLine = new Line();
 
        // Toast.makeText(ar_list.this, g_vbeln.trim(), Toast.LENGTH_SHORT).show();
 
         VbelnFList fillList = new VbelnFList();
         fillList.execute(g_vbeln.trim());
 
+       /* reqBtn.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+
+            }
+        });*/
 
     }
 
@@ -106,7 +118,6 @@ public class ar_list extends AppCompatActivity {
             kunnr.setText(h_kunnr);
             vbeln.setText(h_vbeln);
             carlicense.setText(h_carlicense);
-
 
             if(h_documentid==null || h_documentid.equals("")){
                 h_documentid = "";
@@ -130,7 +141,6 @@ public class ar_list extends AppCompatActivity {
                             lnx.setBackgroundColor(Color.parseColor("#CCC4FFE0"));
                         }
                     }
-
 
                     return view;
                 }
@@ -162,13 +172,29 @@ public class ar_list extends AppCompatActivity {
                     String qposnr = (String) obj.get("posnr");
                     String qarktx = (String) obj.get("arktx");
                     String qlock = (String) obj.get("LOCK");
+                    String qlfimg = (String) obj.get("LFIMG");
                     arg1.setSelected(true);
-                    unlockDo(qposnr,qarktx,qlock);
+                    unlockDo(qposnr,qarktx,qlock,qlfimg);
                     return true;
                 }
             });
-         }
+         }else{
+                /*list_vbeln.setOnItemLongClickListener(new AdapterView.OnItemLongClickListener() {
+                    @Override
+                    public boolean onItemLongClick(AdapterView<?> arg0, View arg1,
+                                                   int arg2, long arg3) {
 
+                        HashMap<String, Object> obj = (HashMap<String, Object>) ADA
+                                .getItem(arg2);
+                        String qposnr = (String) obj.get("posnr");
+                        String qarktx = (String) obj.get("arktx");
+                        arg1.setSelected(true);
+                        closeDo(h_vbeln,qposnr,qarktx);
+                        return true;
+                    }
+                });*/
+            }
+          //  Log.d("p8",z);
             pbbar.setVisibility(View.GONE);
 
         }
@@ -195,6 +221,8 @@ public class ar_list extends AppCompatActivity {
                         datanums.put("posnr", rs.getString("posnr"));
                         datanums.put("sscan", rs.getString("sscan"));
                         datanums.put("LOCK", rs.getString("LOCK"));
+                        datanums.put("LFIMG", rs.getString("LFIMG"));
+                        datanums.put("DIVQTY", rs.getString("DIVQTY"));
 
                         vbelnlist.add(datanums);
 
@@ -205,13 +233,18 @@ public class ar_list extends AppCompatActivity {
                         h_unit = rs.getString("unit");
                         h_lfimg = rs.getString("LFIMG");
                         h_carlicense = rs.getString("CARLICENSE");
+                        h_divqty = rs.getString("DIVQTY");
 
                         h_documentid = rs.getString("DocumentId");
 
                     }
+                    if(h_divqty==null || h_divqty.equals("") || h_divqty.equals("null")){
+                        h_divqty = "0" ;
+                    }
 
                     // z = "Success";
                     z = query ;
+
                 }
             } catch (Exception ex) {
 
@@ -228,7 +261,7 @@ public class ar_list extends AppCompatActivity {
     public void onRemarkClick(){
         AlertDialog.Builder builder = new AlertDialog.Builder(ar_list.this);
         builder.setTitle("สาเหตุที่ปลดล็อค DO");
-        String[] remark = {"ตัวแปร","ลูกค้าเปลี่ยน","เหล็กมีปัญหา","ระบบมีปัญหา","ตาชั่งมีปัญหา","ขึ้นเร่งด่วน รอบิล","ลืมยิง/ยิงไม่ครบ"};
+        String[] remark = {"ตัวแปร","ลูกค้าเปลี่ยน","เหล็กมีปัญหา","ระบบมีปัญหา","ตาชั่งมีปัญหา","ขึ้นเร่งด่วน รอบิล","ลืมยิง/ยิงไม่ครบ","เกินในมัด","เปลี่ยนเหล็ก","น้ำหนักเกิน"};
         builder.setItems(remark, new DialogInterface.OnClickListener() {
             @Override
             public void onClick(DialogInterface dialog, int which) {
@@ -249,6 +282,12 @@ public class ar_list extends AppCompatActivity {
                         break;
                     case 6: rm = "ลืมยิง/ยิงไม่ครบ";
                         break;
+                    case 7: rm = "เกินในมัด";
+                        break;
+                    case 8: rm = "เปลี่ยนเหล็ก";
+                        break;
+                    case 9: rm = "น้ำหนักเกิน";
+                        break;
 
                 }
                setRemark(rm);
@@ -267,7 +306,7 @@ public class ar_list extends AppCompatActivity {
 
     private void checkRemark() {
 
-        if (q_remark.getText().toString() == null || q_remark.getText().toString().equals("") || q_remark.getText().toString().equals("เลือกหมายเหตุ") ) {
+        if (q_remark.getText().toString() == null || q_remark.getText().toString().equals("") || q_remark.getText().toString().equals("เลือกหมายเหตุ")  ) {
             q_btn_save.setVisibility(View.GONE);
             q_lock.setBackgroundColor(Color.parseColor("#CDFFDC"));
             q_lock.setTextColor(Color.parseColor("#00932C"));
@@ -282,22 +321,25 @@ public class ar_list extends AppCompatActivity {
         //Log.d("REMARK",q_remark.getText().toString());
     }
 
-    public void unlockDo(final String qposnr, final String qarktx, final String qlock){
+    public void unlockDo(final String qposnr, final String qarktx, final String qlock,final  String qlfimg){
 
         final Dialog qdialog = new Dialog(ar_list.this);
         qdialog.requestWindowFeature(Window.FEATURE_NO_TITLE);
         qdialog.setContentView(R.layout.dialog_seq);
 
         qdialog.setCancelable(true);
-        final TextView q_arktx,q_vbeln;
+        final TextView q_arktx,q_vbeln,q_lfimg;
+
 
         q_arktx = (TextView)qdialog.findViewById(R.id.q_arktx);
         q_vbeln = (TextView)qdialog.findViewById(R.id.q_vbeln);
         q_lock = (TextView)qdialog.findViewById(R.id.q_lock);
         q_remark = (TextView)qdialog.findViewById(R.id.q_remark);
+        q_lfimg = (TextView)qdialog.findViewById(R.id.q_lfimg);
 
         q_btn_save = (Button)qdialog.findViewById(R.id.q_btn_save);
 
+        q_lfimg.setText(qlfimg);
         q_arktx.setText(qarktx);
         q_vbeln.setText(h_vbeln);
         String premark = "";
@@ -311,9 +353,38 @@ public class ar_list extends AppCompatActivity {
             plock ="ปลดล็อค";
         }
 
+
+
         checkRemark();
         q_remark.setText(premark);
         q_lock.setText(plock);
+        q_lfill = (EditText) qdialog.findViewById(R.id.edt_lfimg);
+        q_lfill.setText(h_divqty);
+        q_lfill.addTextChangedListener(new TextWatcher() {
+
+            @Override
+            public void afterTextChanged(Editable s) {}
+
+            @Override
+            public void beforeTextChanged(CharSequence s, int start,
+                                          int count, int after) {
+            }
+
+            @Override
+            public void onTextChanged(CharSequence s, int start,
+                                      int before, int count) {
+                if (s.length() != 0)
+                    if (!q_lfill.getText().toString().equals(h_divqty)) {
+                        q_btn_save.setVisibility(View.VISIBLE);
+                        q_lock.setText("เพิ่มตัวแปร");
+                    } else {
+                        checkRemark();
+                        //q_btn_save.setVisibility(View.GONE);
+                        //q_lock.setText("ปกติ");
+                    }
+            }
+
+        });
 
         q_remark.setOnClickListener(new View.OnClickListener() {
 
@@ -327,8 +398,11 @@ public class ar_list extends AppCompatActivity {
 
             public void onClick(View v) {
 
+
+                q_lfill = (EditText) qdialog.findViewById(R.id.edt_lfimg);
+
                 UpdateLockDo ulck = new UpdateLockDo();
-                ulck.execute(qposnr,l);
+                ulck.execute(qposnr,l,q_lfill.getText().toString().trim());
                 qdialog.dismiss();
             }
         });
@@ -337,9 +411,56 @@ public class ar_list extends AppCompatActivity {
 
     }
 
+    public void closeDo(final String cvbeln, final String cposnr,String carktx){
+
+        final Dialog cdialog = new Dialog(ar_list.this);
+        cdialog.requestWindowFeature(Window.FEATURE_NO_TITLE);
+        cdialog.setContentView(R.layout.dialog_close);
+        cdialog.setCancelable(true);
+
+        TextView q_arktx,q_vbeln;
+        Button close_btn;
+
+        q_arktx = (TextView)cdialog.findViewById(R.id.q_arktx);
+        q_vbeln = (TextView)cdialog.findViewById(R.id.q_vbeln);
+        q_arktx.setText(carktx);
+        q_vbeln.setText(cvbeln+"-"+cposnr);
+        close_btn = (Button)cdialog.findViewById(R.id.close_btn);
+        close_btn.setOnClickListener(new View.OnClickListener(){
+
+            @Override
+            public void onClick(View view) {
+
+                AlertDialog.Builder builder =
+                        new AlertDialog.Builder(ar_list.this);
+                builder.setMessage("ยืนยันปิดจบ " + cvbeln + "-"+cposnr+" หรือไม่ ?");
+                builder.setPositiveButton("ตกลง", new DialogInterface.OnClickListener() {
+                    public void onClick(DialogInterface dialog, int id) {
+                        cdialog.dismiss();
+                        CloseUpdate closeupd = new CloseUpdate();
+                        closeupd.execute(g_vbeln.trim());
+                    }
+                });
+                builder.setNegativeButton("ยกเลิก", new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialog, int which) {
+
+                    }
+                });
+                builder.show();
+            }
+        });
+
+        cdialog.show();
+
+    }
+
+
+
     public class UpdateLockDo extends AsyncTask<String, String, String> {
 
         String z = "";
+        String uremark ="";
         Boolean isSuccess = false;
 
         @Override
@@ -352,6 +473,11 @@ public class ar_list extends AppCompatActivity {
             pbbar.setVisibility(View.GONE);
 
             Toast.makeText(ar_list.this, r, Toast.LENGTH_SHORT).show();
+
+            if(isSuccess==true){
+                //if(uremark.equals("ตาชั่งมีปัญหา") || uremark.equals("ระบบชั่งมีปัญหา"))
+                sLine.PushMessage(usrHelper.getUserName(),h_vbeln,h_carlicense,h_kunnr,h_arktx,uremark);
+            }
 
             VbelnFList fillList = new VbelnFList();
             fillList.execute(g_vbeln.trim());
@@ -369,16 +495,75 @@ public class ar_list extends AppCompatActivity {
                     //1--qposnr/////2--qarktx/////3--qmatnr///////4--qlfimg/////5--qticket///////6--qunit);
 
                     String lock = "";
-                    if(params[1] ==null || params[1].equals("")){
-                        lock = " lock = NULL ";
+                    if(params[1] ==null || params[1].equals("") || params[1].equals("เลือกหมายเหตุ")){
+
                     }else {
                         lock = " lock = '"+params[1].trim()+"' ";
+                        uremark = params[1].trim();
+
+                        String query = "update tbl_shipmentplan set "+lock+" where vbeln = '"+h_vbeln+"' and posnr = '"+params[0]+"'";
+                        PreparedStatement preparedStatement = con.prepareStatement(query);
+                        preparedStatement.executeUpdate();
                     }
 
-                    String query = "update tbl_shipmentplan set "+lock+" where vbeln = '"+h_vbeln+"' and posnr = '"+params[0]+"'";
-                    PreparedStatement preparedStatement = con.prepareStatement(query);
-                    preparedStatement.executeUpdate();
+                    String qDIVQTY = "update tbl_shipmentplan set DIVQTY = "+params[2]+" where vbeln = '"+h_vbeln+"' and posnr = '"+params[0]+"'";
+                    PreparedStatement qpreparedStatement = con.prepareStatement(qDIVQTY);
+                    qpreparedStatement.executeUpdate();
+
+
                     z = "บันทึกการเปลี่ยนแปลง";
+                    isSuccess = true;
+                }
+            } catch (Exception ex) {
+                isSuccess = false;
+                z = ex.getMessage().toString();
+            }
+            return z;
+        }
+    }
+
+
+    public class CloseUpdate extends AsyncTask<String, String, String> {
+
+        String z = "" ;
+
+        Boolean isSuccess = false ;
+
+        @Override
+        protected void onPreExecute() {
+            pbbar.setVisibility(View.VISIBLE);
+        }
+
+        @Override
+        protected void onPostExecute(String r) {
+            pbbar.setVisibility(View.GONE);
+
+            Toast.makeText(ar_list.this, r, Toast.LENGTH_SHORT).show();
+
+            if(isSuccess==true){
+                //if(uremark.equals("ตาชั่งมีปัญหา") || uremark.equals("ระบบชั่งมีปัญหา"))
+                //sLine.PushMessage(usrHelper.getUserName(),h_vbeln,h_carlicense,h_kunnr,h_arktx,uremark);
+            }
+
+            VbelnFList fillList = new VbelnFList();
+            fillList.execute(g_vbeln.trim());
+
+        }
+        @Override
+        protected String doInBackground(String... params) {
+
+            try {
+                Connection con = connectionClass.CONN();
+                if (con == null) {
+                    z = "Error in connection with SQL server";
+                } else {
+
+                    String qDIVQTY = "update tbl_shipmentplan set Status = "+params[0]+" ,  where vbeln = '"+h_vbeln+"' and posnr = '"+params[0]+"'";
+                    PreparedStatement qpreparedStatement = con.prepareStatement(qDIVQTY);
+                    qpreparedStatement.executeUpdate();
+
+
+                    z = "ปิดจบเรียบร้อย";
                     isSuccess = true;
                 }
             } catch (Exception ex) {

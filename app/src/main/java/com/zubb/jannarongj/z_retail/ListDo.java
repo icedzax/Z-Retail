@@ -40,7 +40,7 @@ public class ListDo extends AppCompatActivity {
     ProgressBar pbbar;
     ListView lstdo;
     EditText searchBox;
-    String plant ;
+    String plant ,dbView;
 
     public String getFilter() {
         return filter;
@@ -125,6 +125,7 @@ public class ListDo extends AppCompatActivity {
                             fillList.execute(getFilter(),getFilvbeln(),plant);
 
                             //  Toast.makeText(ListDo.this, getTG(), Toast.LENGTH_SHORT).show();
+                            //
                         } else {
                         }
                     }
@@ -138,6 +139,7 @@ public class ListDo extends AppCompatActivity {
 
                     @Override
                     public void afterTextChanged(Editable s) {
+
                         // TODO Auto-generated method stub
 
                     }
@@ -253,6 +255,7 @@ public class ListDo extends AppCompatActivity {
                     return view;
                 }
             };
+
             lstdo.setAdapter(ADA);
             lstdo.setOnItemClickListener(new AdapterView.OnItemClickListener() {
 
@@ -298,6 +301,8 @@ public class ListDo extends AppCompatActivity {
                             break;
                         case "OPS" : plant = " and s.werks in ('2010','9060','1020','9020') ";
                             break;
+                        case "RS" : plant = " and s.ship_point ='1012' ";
+                            break;
                     }
 
                     if(params[1]==null || params[1].equals("")){
@@ -324,6 +329,8 @@ public class ListDo extends AppCompatActivity {
                             "where  s.VBELN is not null and left(s.MATNR,2) not in ('BL','SC') " +plant+ where+ " " + vbeln +
                             "group by s.VBELN,s.AR_NAME,s.CARLICENSE,s.WADAT " +having+
                             "order by 1 desc ";
+
+                    Log.d("query",query);
 
                     PreparedStatement ps = con.prepareStatement(query);
                     ResultSet rs = ps.executeQuery();

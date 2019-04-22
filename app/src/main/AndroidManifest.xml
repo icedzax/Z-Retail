@@ -49,10 +49,7 @@
             android:name=".ar_list"
             android:label="@string/title_activity_ar_list"
             android:theme="@style/AppTheme.NoActionBar" />
-        <activity
-            android:name="com.zubb.jannarongj.zzubp8.Test"
-            android:label="@string/title_activity_test"
-            android:theme="@style/AppTheme.NoActionBar"></activity>
+
     </application>
 
 </manifest>

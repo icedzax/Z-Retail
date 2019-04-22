@@ -23,9 +23,10 @@
             android:background="#5d5d5d"
             android:gravity="center_horizontal"
 
-            android:hint="DOC NO."
+            android:hint="เลขที่เอกสาร"
             android:padding="10dp"
             android:selectAllOnFocus="true"
+            android:singleLine="false"
             android:textColor="#ffffff"
             android:textColorHint="#ffffff"
             android:textSize="20sp"
