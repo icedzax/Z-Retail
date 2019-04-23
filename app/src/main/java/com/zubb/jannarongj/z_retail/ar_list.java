@@ -46,10 +46,10 @@ public class ar_list extends AppCompatActivity {
     Line sLine ;
     ProgressBar pbbar;
     ListView list_vbeln ;
-    Button q_btn_save,reqBtn;
+    Button q_btn_save,closeBtn;
     EditText q_lfill ;
     TextView kunnr,vbeln,carlicense,q_remark,q_lock;
-    String h_kunnr,h_vbeln,h_carlicense,g_vbeln,h_matnr,h_arktx,h_documentid,h_lfimg,h_unit,h_divqty;
+    String h_apr,h_aprby,h_kunnr,h_vbeln,h_carlicense,g_vbeln,h_matnr,h_arktx,h_documentid,h_lfimg,h_unit,h_divqty;
     String l = "";
     String rm ="";
 
@@ -76,7 +76,7 @@ public class ar_list extends AppCompatActivity {
         }
 
 
-        reqBtn =(Button)findViewById(R.id.reqBtn);
+        closeBtn =(Button)findViewById(R.id.closeBtn);
         kunnr = (TextView)findViewById(R.id.kunnr);
         vbeln = (TextView)findViewById(R.id.vbeln);
         carlicense = (TextView)findViewById(R.id.carlicense);
@@ -87,17 +87,39 @@ public class ar_list extends AppCompatActivity {
         connectionClass = new ConnectionClass();
         sLine = new Line();
 
+
        // Toast.makeText(ar_list.this, g_vbeln.trim(), Toast.LENGTH_SHORT).show();
 
         VbelnFList fillList = new VbelnFList();
         fillList.execute(g_vbeln.trim());
 
-       /* reqBtn.setOnClickListener(new View.OnClickListener() {
+        closeBtn.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
 
+
+                    AlertDialog.Builder builder =
+                            new AlertDialog.Builder(ar_list.this);
+                    builder.setTitle("ปิดจบ");
+                    builder.setMessage("ยืนยันการปิดจบ ?");
+                    builder.setPositiveButton("ตกลง", new DialogInterface.OnClickListener() {
+                        public void onClick(DialogInterface dialog, int id) {
+                            CompleteDo cp = new CompleteDo();
+                            cp.execute();
+                        }
+                    });
+                    builder.setNegativeButton("ยกเลิก", new DialogInterface.OnClickListener() {
+                        @Override
+                        public void onClick(DialogInterface dialog, int which) {
+                            //dialog.dismiss();
+
+                        }
+                    });
+                    builder.show();
+
+
             }
-        });*/
+        });
 
     }
 
@@ -195,6 +217,9 @@ public class ar_list extends AppCompatActivity {
                 });*/
             }
           //  Log.d("p8",z);
+
+            checkComplete(h_apr);
+
             pbbar.setVisibility(View.GONE);
 
         }
@@ -241,6 +266,18 @@ public class ar_list extends AppCompatActivity {
                     if(h_divqty==null || h_divqty.equals("") || h_divqty.equals("null")){
                         h_divqty = "0" ;
                     }
+
+                    String qapr = "SELECT max(ApproveOn) as ApproveOn ,max(ApproveBy) as ApproveBy from tbl_shipmentplan where vbeln = '"+h_vbeln+"' " ;
+                    PreparedStatement aps = con.prepareStatement(qapr);
+                    ResultSet ars = aps.executeQuery();
+
+                    while (ars.next()) {
+                        h_apr = ars.getString("ApproveOn");
+                        h_aprby = ars.getString("ApproveBy");
+                        //sumweight = qrs.getInt("sw");
+                    }
+
+
 
                     // z = "Success";
                     z = query ;
@@ -411,50 +448,56 @@ public class ar_list extends AppCompatActivity {
 
     }
 
-    public void closeDo(final String cvbeln, final String cposnr,String carktx){
+    public class CompleteDo extends AsyncTask<String, String, String> {
 
-        final Dialog cdialog = new Dialog(ar_list.this);
-        cdialog.requestWindowFeature(Window.FEATURE_NO_TITLE);
-        cdialog.setContentView(R.layout.dialog_close);
-        cdialog.setCancelable(true);
+        String z = "";
+        Boolean isSuccess = false;
 
-        TextView q_arktx,q_vbeln;
-        Button close_btn;
+        @Override
+        protected void onPreExecute() {
+            pbbar.setVisibility(View.VISIBLE);
+        }
 
-        q_arktx = (TextView)cdialog.findViewById(R.id.q_arktx);
-        q_vbeln = (TextView)cdialog.findViewById(R.id.q_vbeln);
-        q_arktx.setText(carktx);
-        q_vbeln.setText(cvbeln+"-"+cposnr);
-        close_btn = (Button)cdialog.findViewById(R.id.close_btn);
-        close_btn.setOnClickListener(new View.OnClickListener(){
+        @Override
+        protected void onPostExecute(String r) {
+            pbbar.setVisibility(View.GONE);
+            Toast.makeText(ar_list.this, r, Toast.LENGTH_SHORT).show();
 
-            @Override
-            public void onClick(View view) {
+            if(isSuccess==true) {
 
-                AlertDialog.Builder builder =
-                        new AlertDialog.Builder(ar_list.this);
-                builder.setMessage("ยืนยันปิดจบ " + cvbeln + "-"+cposnr+" หรือไม่ ?");
-                builder.setPositiveButton("ตกลง", new DialogInterface.OnClickListener() {
-                    public void onClick(DialogInterface dialog, int id) {
-                        cdialog.dismiss();
-                        CloseUpdate closeupd = new CloseUpdate();
-                        closeupd.execute(g_vbeln.trim());
-                    }
-                });
-                builder.setNegativeButton("ยกเลิก", new DialogInterface.OnClickListener() {
-                    @Override
-                    public void onClick(DialogInterface dialog, int which) {
+                VbelnFList fillList = new VbelnFList();
+                fillList.execute(g_vbeln.trim());
 
-                    }
-                });
-                builder.show();
+
             }
-        });
 
-        cdialog.show();
+        }
 
+        @Override
+        protected String doInBackground(String... params) {
+
+            try {
+                Connection con = connectionClass.CONN();
+                if (con == null) {
+                    z = "Error in connection with SQL server";
+                } else {
+
+                    String query = "update tbl_shipmentplan  set ApproveOn  = CURRENT_TIMESTAMP , ApproveBy = '"+usrHelper.getUserName()+"' WHERE vbeln = '"+h_vbeln+"'";
+                    PreparedStatement preparedStatement = con.prepareStatement(query);
+                    preparedStatement.executeUpdate();
+                    z = "ปิดจบสำเร็จ";
+
+
+                    isSuccess = true;
+                }
+            } catch (Exception ex) {
+                isSuccess = false;
+                z = "ปิดจบไม่สำเร็จ";
+            }
+
+            return z;
+        }
     }
-
 
 
     public class UpdateLockDo extends AsyncTask<String, String, String> {
@@ -574,6 +617,20 @@ public class ar_list extends AppCompatActivity {
         }
     }
 
+    void checkComplete(String cStat){
+        if(usrHelper.getPlant().equals("RS") || usrHelper.getUserName().equals("Wassana.k")){
+
+        closeBtn.setVisibility(View.VISIBLE);
+        if(cStat!=null){
+            closeBtn.setText("ปิดจบเรียบร้อยแล้ว");
+            closeBtn.setEnabled(false);
+            closeBtn.setTextColor(Color.parseColor("BLACK"));
+            closeBtn.setBackgroundColor(Color.parseColor("#999999"));
+        }
+    }else{
+            closeBtn.setVisibility(View.GONE);
+        }
+  }
 
 }
 

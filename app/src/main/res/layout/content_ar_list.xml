@@ -79,19 +79,20 @@
             android:layout_height="wrap_content"
             android:layout_below="@+id/lvb"
             android:orientation="horizontal"
-            android:visibility="gone">
+            android:visibility="visible">
 
 
             <Button
-                android:id="@+id/reqBtn"
+                android:id="@+id/closeBtn"
                 style="@style/Widget.AppCompat.Button.Colored"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_weight="1"
-                android:text="ขอปรับเกรด"
+                android:text="ปิดจบ"
                 android:textAlignment="center"
                 android:textSize="25sp"
-                android:textStyle="bold" />
+                android:textStyle="bold"
+                android:visibility="invisible" />
         </LinearLayout>
     </LinearLayout>
 

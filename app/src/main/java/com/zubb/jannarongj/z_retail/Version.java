@@ -6,7 +6,7 @@ package com.zubb.jannarongj.z_retail;
 
 public class Version {
 
-    public String Version = "4.6";
+    public String Version = "4.5";
     public String name = "zubbp8";
 
     public String getAppName() {

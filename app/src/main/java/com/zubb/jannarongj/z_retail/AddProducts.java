@@ -209,6 +209,11 @@ public class AddProducts extends AppCompatActivity {
         btn_pick = (Button)findViewById(R.id.btn_pick);
         btn_complete = (Button)findViewById(R.id.btn_complete);
 
+        btn_complete.setVisibility(View.GONE);
+        btn_del.setVisibility(View.GONE);
+        btn_split.setVisibility(View.GONE);
+        btn_pick.setVisibility(View.GONE);
+
 
         if(!usrHelper.getLevel().equals("10")){
             btn_pick.setVisibility(View.GONE);
@@ -217,6 +222,13 @@ public class AddProducts extends AppCompatActivity {
         userPlant = usrHelper.getPlant();
         FillList fillList = new FillList();
         fillList.execute(g_vbeln.trim(),g_posnr.trim());
+
+        /*if(h_apr!=null || !"null".equals(h_apr)){
+            alreadyApp(true);
+        }else{
+            alreadyApp(false);
+        }*/
+
 
         user = usrHelper.getUserName();
         ver = usrHelper.getVer();
@@ -425,11 +437,9 @@ public class AddProducts extends AppCompatActivity {
                     }else{
                         splitInsert(shn, Integer.parseInt(sqty),false);
                     }
-
                 }
             }else{
                 onErrorDialog(getErDup(),getErCar(),getErNf(),getErMm(),getErNm(),getErQi(),getErApp());
-
             }
             pbbar.setVisibility(View.GONE);
             FillList fillList = new FillList();
@@ -676,7 +686,7 @@ public class AddProducts extends AppCompatActivity {
                 if (con == null) {
                     z = "พบปัญหาการเชื่อมต่อ";
                 } else {
-                    int maxspl = 0 ;
+                    int maxspl = 0;
 
                     String maxSp = "if exists (select top 1 isnull(split_bundle,0)+1 as split_bundlex from tbl_shipment_item where item_barcode = '" + params[0].trim() + "')" +
                             " begin select top 1 isnull(split_bundle,0)+1 as split_bundlex from tbl_shipment_item where item_barcode = '" + params[0].trim() + "' order by add_stamp desc " +
@@ -688,7 +698,7 @@ public class AddProducts extends AppCompatActivity {
                     PreparedStatement ms = con.prepareStatement(maxSp);
                     ResultSet rms = ms.executeQuery();
 
-                    if(params[2].equals("R")){
+                    if (params[2].equals("R")) {
 
                     }
 
@@ -699,43 +709,48 @@ public class AddProducts extends AppCompatActivity {
                     double limit = h_limit;
                     double rs = h_rs;
 
-                    int nweight = (int) ((ntgew/limit)*rs);
-                            if(params[2].equals("R")){
-                                String insrt = "insert into tbl_shipment_item (VBELN,POSNR,charge,bundle,grade,size,weight," +
-                                        "location,add_stamp,item_barcode,user_add,del_stamp,del_user,qty,unit,mat_code,WADAT," +
-                                        "carlicense,DocumentId,qa_grade,KUNNR,AR_NAME,split_bundle,rmd_date) "+
-                                        "values ('"+h_vbeln+"','"+h_posnr+"','RETAIL','"+maxspl+"',NULL," +
-                                        "'"+h_arktx+"','"+nweight+"','"+usrHelper.getPlant()+"',current_timestamp,'"+params[0]+"','"+user+"_"+ver+"'," +
-                                        "current_timestamp,'"+user+"_"+ver+"','"+h_rs+"','"+h_unit+"','"+params[0]+"','"+h_wadatx+"','"+rfscar+"','"+rfsdocid+"'," +
-                                        "'A','"+h_kunnr+"','"+h_ar_name+"',"+maxspl+",NULL)";
+                    int nweight = (int) ((ntgew / limit) * rs);
+                    if (getErDup() == 0 && getErCar() == 0 && getErNf() == 0 && getErMm() == 0 && getErNm() == 0 && getErApp() == 0) {
+                        if (params[2].equals("R")) {
 
-                                PreparedStatement preparedStatement = con.prepareStatement(insrt);
-                                preparedStatement.executeUpdate();
-                                isSuccess=true ;
-                                z = "บันทึกเรียบร้อยแล้ว";
-                            }else{
-                                int paramQty = Integer.parseInt(params[1]);
-                                nweight = (int) ((ntgew/limit)*paramQty);
-                                if(params[1]==null || (paramQty <= 0)){
-                                    params[1] = r_qty ;
-                                    nweight = Integer.parseInt(rmd_weight);
-                                }
+                            String insrt = "insert into tbl_shipment_item (VBELN,POSNR,charge,bundle,grade,size,weight," +
+                                    "location,add_stamp,item_barcode,user_add,del_stamp,del_user,qty,unit,mat_code,WADAT," +
+                                    "carlicense,DocumentId,qa_grade,KUNNR,AR_NAME,split_bundle,rmd_date) " +
+                                    "values ('" + h_vbeln + "','" + h_posnr + "','RETAIL','" + maxspl + "',NULL," +
+                                    "'" + h_arktx + "','" + nweight + "','" + usrHelper.getPlant() + "',current_timestamp,'" + params[0] + "','" + user + "_" + ver + "'," +
+                                    "current_timestamp,'" + user + "_" + ver + "','" + h_rs + "','" + h_unit + "','" + params[0] + "','" + h_wadatx + "','" + rfscar + "','" + rfsdocid + "'," +
+                                    "'A','" + h_kunnr + "','" + h_ar_name + "'," + maxspl + ",NULL)";
 
-                                String insrt = "insert into tbl_shipment_item (VBELN,POSNR,charge,bundle,grade,size,weight," +
-                                        "location,add_stamp,item_barcode,user_add,del_stamp,del_user,qty,unit,mat_code,WADAT," +
-                                        "carlicense,DocumentId,qa_grade,KUNNR,AR_NAME,split_bundle,rmd_date) "+
-                                        "values ('"+h_vbeln+"','"+h_posnr+"','"+rmd_charge+"','"+r_bundle+"','"+rmd_grade+"'," +
-                                        "'"+h_arktx+"','"+nweight+"','ZUBB',current_timestamp,'"+params[0]+"','"+user+"_"+ver+"'," +
-                                        "current_timestamp,'"+user+"_"+ver+"','"+params[1]+"','"+h_unit+"','"+matcode+"','"+h_wadatx+"','"+rfscar+"','"+rfsdocid+"'," +
-                                        "'"+rmd_qa_grade+"','"+h_kunnr+"','"+h_ar_name+"',"+maxspl+",'"+rmd_date+"')";
-
-                                PreparedStatement preparedStatement = con.prepareStatement(insrt);
-                                preparedStatement.executeUpdate();
-                                isSuccess=true ;
-                                z = "บันทึกเรียบร้อยแล้ว";
+                            PreparedStatement preparedStatement = con.prepareStatement(insrt);
+                            preparedStatement.executeUpdate();
+                            isSuccess = true;
+                            z = "บันทึกเรียบร้อยแล้ว";
+                        } else {
+                            int paramQty = Integer.parseInt(params[1]);
+                            nweight = (int) ((ntgew / limit) * paramQty);
+                            if (params[1] == null || (paramQty <= 0)) {
+                                params[1] = r_qty;
+                                nweight = Integer.parseInt(rmd_weight);
                             }
 
+                            String insrt = "insert into tbl_shipment_item (VBELN,POSNR,charge,bundle,grade,size,weight," +
+                                    "location,add_stamp,item_barcode,user_add,del_stamp,del_user,qty,unit,mat_code,WADAT," +
+                                    "carlicense,DocumentId,qa_grade,KUNNR,AR_NAME,split_bundle,rmd_date) " +
+                                    "values ('" + h_vbeln + "','" + h_posnr + "','" + rmd_charge + "','" + r_bundle + "','" + rmd_grade + "'," +
+                                    "'" + h_arktx + "','" + nweight + "','ZUBB',current_timestamp,'" + params[0] + "','" + user + "_" + ver + "'," +
+                                    "current_timestamp,'" + user + "_" + ver + "','" + params[1] + "','" + h_unit + "','" + matcode + "','" + h_wadatx + "','" + rfscar + "','" + rfsdocid + "'," +
+                                    "'" + rmd_qa_grade + "','" + h_kunnr + "','" + h_ar_name + "'," + maxspl + ",'" + rmd_date + "')";
+
+                            PreparedStatement preparedStatement = con.prepareStatement(insrt);
+                            preparedStatement.executeUpdate();
+                            isSuccess = true;
+                            z = "บันทึกเรียบร้อยแล้ว";
                         }
+
+                    }else{
+                        isSuccess = false;
+                    }
+                }
 
             } catch (Exception ex) {
                 isSuccess = false;
@@ -819,8 +834,10 @@ public class AddProducts extends AppCompatActivity {
 
             if(h_apr!=null){
                 setErApp(1);
+                alreadyApp(true);
             }else{
                 setErApp(0);
+                alreadyApp(false);
             }
 
             String stext  = h_vbeln+"-"+h_posnr;
@@ -968,11 +985,9 @@ public class AddProducts extends AppCompatActivity {
 
             //Toast.makeText(AddProducts.this,getErCar(),Toast.LENGTH_SHORT).show();
 
-            //Log.d("ercar", String.valueOf(getErCar()));
+            //Log.d("h_apr", h_apr+" , "+h_aprby);
 
-            if(h_apr!=null){
-                alreadyApp();
-            }
+
 
             pbbar.setVisibility(View.GONE);
 
@@ -1663,7 +1678,7 @@ public class AddProducts extends AppCompatActivity {
 
                     //Log.d("params0", params[0]);
 
-                    if (getErDup() == 0 && getErCar()==0 && getErNf() == 0 && getErMm() == 0 && getErNm() == 0) {
+                    if (getErDup() == 0 && getErCar()==0 && getErNf() == 0 && getErMm() == 0 && getErNm() == 0 && getErApp() == 0) {
 
                     String pinsrt = "insert into tbl_shipment_item (VBELN,POSNR,charge,bundle,grade,size,weight," +
                             "location,add_stamp,item_barcode,user_add,del_stamp,del_user,qty,unit,mat_code,WADAT," +
@@ -1696,15 +1711,27 @@ public class AddProducts extends AppCompatActivity {
     }
 
 
-    public void alreadyApp(){
+    public void alreadyApp(boolean app){
 
-        btn_del.setVisibility(View.GONE);
-        btn_split.setVisibility(View.GONE);
-        btn_pick.setVisibility(View.GONE);
-        btn_complete.setText("ปิดจบเรียบร้อยแล้ว");
-        btn_complete.setEnabled(false);
-        btn_complete.setTextColor(Color.parseColor("#0C8600"));
-        btn_complete.setBackgroundColor(Color.parseColor("#57F947"));
+        if(app == true){
+            btn_del.setVisibility(View.GONE);
+            btn_split.setVisibility(View.GONE);
+            btn_pick.setVisibility(View.GONE);
+            btn_complete.setText("ปิดจบเรียบร้อยแล้ว");
+            btn_complete.setEnabled(false);
+            btn_complete.setTextColor(Color.parseColor("#0C8600"));
+            btn_complete.setBackgroundColor(Color.parseColor("#57F947"));
+            btn_complete.setVisibility(View.VISIBLE);
+        }
+        else{
+            btn_complete.setVisibility(View.GONE);
+            btn_del.setVisibility(View.VISIBLE);
+            btn_split.setVisibility(View.VISIBLE);
+            btn_pick.setVisibility(View.VISIBLE);
+        }
+
+
+
     }
 
 
