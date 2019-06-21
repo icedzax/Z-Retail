@@ -88,7 +88,7 @@ public class ar_list extends AppCompatActivity {
         sLine = new Line();
 
 
-       // Toast.makeText(ar_list.this, g_vbeln.trim(), Toast.LENGTH_SHORT).show();
+        // Toast.makeText(ar_list.this, g_vbeln.trim(), Toast.LENGTH_SHORT).show();
 
         VbelnFList fillList = new VbelnFList();
         fillList.execute(g_vbeln.trim());
@@ -98,24 +98,24 @@ public class ar_list extends AppCompatActivity {
             public void onClick(View view) {
 
 
-                    AlertDialog.Builder builder =
-                            new AlertDialog.Builder(ar_list.this);
-                    builder.setTitle("ปิดจบ");
-                    builder.setMessage("ยืนยันการปิดจบ ?");
-                    builder.setPositiveButton("ตกลง", new DialogInterface.OnClickListener() {
-                        public void onClick(DialogInterface dialog, int id) {
-                            CompleteDo cp = new CompleteDo();
-                            cp.execute();
-                        }
-                    });
-                    builder.setNegativeButton("ยกเลิก", new DialogInterface.OnClickListener() {
-                        @Override
-                        public void onClick(DialogInterface dialog, int which) {
-                            //dialog.dismiss();
+                AlertDialog.Builder builder =
+                        new AlertDialog.Builder(ar_list.this);
+                builder.setTitle("ปิดจบ");
+                builder.setMessage("ยืนยันการปิดจบ ?");
+                builder.setPositiveButton("ตกลง", new DialogInterface.OnClickListener() {
+                    public void onClick(DialogInterface dialog, int id) {
+                        CompleteDo cp = new CompleteDo();
+                        cp.execute();
+                    }
+                });
+                builder.setNegativeButton("ยกเลิก", new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialog, int which) {
+                        //dialog.dismiss();
 
-                        }
-                    });
-                    builder.show();
+                    }
+                });
+                builder.show();
 
 
             }
@@ -184,23 +184,23 @@ public class ar_list extends AppCompatActivity {
                 }
             });
             if(usrHelper.getLevel().equals("10")){
-            list_vbeln.setOnItemLongClickListener(new AdapterView.OnItemLongClickListener() {
-                @Override
-                public boolean onItemLongClick(AdapterView<?> arg0, View arg1,
-                                               int arg2, long arg3) {
+                list_vbeln.setOnItemLongClickListener(new AdapterView.OnItemLongClickListener() {
+                    @Override
+                    public boolean onItemLongClick(AdapterView<?> arg0, View arg1,
+                                                   int arg2, long arg3) {
 
-                    HashMap<String, Object> obj = (HashMap<String, Object>) ADA
-                            .getItem(arg2);
-                    String qposnr = (String) obj.get("posnr");
-                    String qarktx = (String) obj.get("arktx");
-                    String qlock = (String) obj.get("LOCK");
-                    String qlfimg = (String) obj.get("LFIMG");
-                    arg1.setSelected(true);
-                    unlockDo(qposnr,qarktx,qlock,qlfimg);
-                    return true;
-                }
-            });
-         }else{
+                        HashMap<String, Object> obj = (HashMap<String, Object>) ADA
+                                .getItem(arg2);
+                        String qposnr = (String) obj.get("posnr");
+                        String qarktx = (String) obj.get("arktx");
+                        String qlock = (String) obj.get("LOCK");
+                        String qlfimg = (String) obj.get("LFIMG");
+                        arg1.setSelected(true);
+                        unlockDo(qposnr,qarktx,qlock,qlfimg);
+                        return true;
+                    }
+                });
+            }else{
                 /*list_vbeln.setOnItemLongClickListener(new AdapterView.OnItemLongClickListener() {
                     @Override
                     public boolean onItemLongClick(AdapterView<?> arg0, View arg1,
@@ -216,7 +216,7 @@ public class ar_list extends AppCompatActivity {
                     }
                 });*/
             }
-          //  Log.d("p8",z);
+            //  Log.d("p8",z);
 
             checkComplete(h_apr);
 
@@ -327,8 +327,8 @@ public class ar_list extends AppCompatActivity {
                         break;
 
                 }
-               setRemark(rm);
-               l = rm ;
+                setRemark(rm);
+                l = rm ;
             }
         });
 
@@ -620,17 +620,17 @@ public class ar_list extends AppCompatActivity {
     void checkComplete(String cStat){
         if(usrHelper.getPlant().equals("RS") || usrHelper.getUserName().equals("Wassana.k")){
 
-        closeBtn.setVisibility(View.VISIBLE);
-        if(cStat!=null){
-            closeBtn.setText("ปิดจบเรียบร้อยแล้ว");
-            closeBtn.setEnabled(false);
-            closeBtn.setTextColor(Color.parseColor("BLACK"));
-            closeBtn.setBackgroundColor(Color.parseColor("#999999"));
-        }
-    }else{
+            closeBtn.setVisibility(View.VISIBLE);
+            if(cStat!=null){
+                closeBtn.setText("ปิดจบเรียบร้อยแล้ว");
+                closeBtn.setEnabled(false);
+                closeBtn.setTextColor(Color.parseColor("BLACK"));
+                closeBtn.setBackgroundColor(Color.parseColor("#999999"));
+            }
+        }else{
             closeBtn.setVisibility(View.GONE);
         }
-  }
+    }
 
 }
 

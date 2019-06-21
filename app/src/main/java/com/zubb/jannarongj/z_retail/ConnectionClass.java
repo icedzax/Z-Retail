@@ -16,7 +16,11 @@ import java.sql.SQLException;
 public class ConnectionClass {
 
     public static String getUip() {
-        return uip;
+        if(uip==null){
+            return "192.168.100.222";
+        }else{
+            return uip;
+        }
     }
 
     public static void setUip(String uip) {
@@ -24,7 +28,11 @@ public class ConnectionClass {
     }
 
     public static String getUpass() {
-        return upass;
+        if(upass==null){
+            return "";
+        }else{
+            return upass;
+        }
     }
 
     public static void setUpass(String upass) {

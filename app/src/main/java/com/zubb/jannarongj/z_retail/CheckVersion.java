@@ -49,13 +49,13 @@ public class CheckVersion extends AppCompatActivity {
         vers = new Version();
         connectionClass = new ConnectionClass();
 
-        if(ip!= null && ip.substring(8,11).equals("116")){
+       /* if(ip!= null && ip.substring(8,11).equals("116")){
             connectionClass.setUip("192.168.116.222");
             connectionClass.setUpass("sipco77");
         }else {
             connectionClass.setUip("192.168.100.222");
             connectionClass.setUpass("");
-        }
+        }*/
 
         pbbar = (ProgressBar) findViewById(R.id.pbbar);
         cur_app = (TextView) findViewById(R.id.cur_app);

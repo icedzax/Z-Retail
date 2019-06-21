@@ -8,6 +8,7 @@
     tools:context="com.zubb.jannarongj.z_retail.AddProducts"
     tools:showIn="@layout/activity_add_products">
 
+
     <LinearLayout
         android:id="@+id/screen"
         android:layout_width="match_parent"
@@ -115,7 +116,7 @@
                     android:layout_height="wrap_content"
                     android:text="XX-XXXX"
                     android:textColor="#71d1ff"
-                    android:textSize="16dp"
+                    android:textSize="14sp"
                     android:textStyle="bold" />
 
                 <TextView

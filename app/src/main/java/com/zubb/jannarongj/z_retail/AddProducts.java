@@ -241,21 +241,21 @@ public class AddProducts extends AppCompatActivity {
                 if (getErCar()!=0) {
                     onErrorDialog(0,getErCar(),0,0,0,0,getErApp());
                 }else{
-                if(split_flag==true){
-                    lvitem.setVisibility(View.VISIBLE);
-                    tv_splittxt.setVisibility(View.GONE);
-                    btn_split.setText("เต็มมัด");
-                    split_flag = false;
-                   // Toast.makeText(AddProducts.this, split_flag.toString(), Toast.LENGTH_SHORT).show();
-                }else{
-                    tv_splittxt.setVisibility(View.VISIBLE);
-                    lvitem.setVisibility(View.GONE);
-                    btn_split.setText("ขึ้นเศษ");
-                    split_flag = true;
-                   // Toast.makeText(AddProducts.this, split_flag.toString(), Toast.LENGTH_SHORT).show();
-               }
-             }
-          }
+                    if(split_flag==true){
+                        lvitem.setVisibility(View.VISIBLE);
+                        tv_splittxt.setVisibility(View.GONE);
+                        btn_split.setText("เต็มมัด");
+                        split_flag = false;
+                        // Toast.makeText(AddProducts.this, split_flag.toString(), Toast.LENGTH_SHORT).show();
+                    }else{
+                        tv_splittxt.setVisibility(View.VISIBLE);
+                        lvitem.setVisibility(View.GONE);
+                        btn_split.setText("ขึ้นเศษ");
+                        split_flag = true;
+                        // Toast.makeText(AddProducts.this, split_flag.toString(), Toast.LENGTH_SHORT).show();
+                    }
+                }
+            }
         });
 
         hideEdt.requestFocus();
@@ -265,10 +265,10 @@ public class AddProducts extends AppCompatActivity {
 
                 if((event != null && (event.getKeyCode() == KeyEvent.KEYCODE_ENTER)) || (actionId == EditorInfo.IME_ACTION_DONE)) {
                     if(hideEdt.getText().toString().trim().contains("DEMO")){
-                        demo = hideEdt.getText().toString().trim().replace("DEMO","").replace("*","").replaceAll("\r", "").replaceAll("\n", "").replaceAll("\t", "");
+                        demo = hideEdt.getText().toString().trim().replace("DEMO","").replace("*","").replaceAll("\r", "").replaceAll("\n", "").replaceAll("\t", "").trim();
 
                     }else{
-                        demo = hideEdt.getText().toString().trim().replace("*","").replaceAll("\r", "").replaceAll("\n", "").replaceAll("\t", "");
+                        demo = hideEdt.getText().toString().trim().replace("*","").replaceAll("\r", "").replaceAll("\n", "").replaceAll("\t", "").trim();
                     }
                     insertSCAN(demo);
                 }
@@ -286,24 +286,24 @@ public class AddProducts extends AppCompatActivity {
                     onErrorDialog(0,getErCar(),0,0,0,0,getErApp()); //
                 } else {
 
-                        AlertDialog.Builder builder =
-                                new AlertDialog.Builder(AddProducts.this);
-                        builder.setTitle("ปิดจบ");
-                        builder.setMessage("ยืนยันการปิดจบ ?");
-                        builder.setPositiveButton("ตกลง", new DialogInterface.OnClickListener() {
-                            public void onClick(DialogInterface dialog, int id) {
-                                CompleteDo cp = new CompleteDo();
-                                cp.execute(h_vbeln,h_posnr);
-                            }
-                        });
-                        builder.setNegativeButton("ยกเลิก", new DialogInterface.OnClickListener() {
-                            @Override
-                            public void onClick(DialogInterface dialog, int which) {
-                                //dialog.dismiss();
+                    AlertDialog.Builder builder =
+                            new AlertDialog.Builder(AddProducts.this);
+                    builder.setTitle("ปิดจบ");
+                    builder.setMessage("ยืนยันการปิดจบ ?");
+                    builder.setPositiveButton("ตกลง", new DialogInterface.OnClickListener() {
+                        public void onClick(DialogInterface dialog, int id) {
+                            CompleteDo cp = new CompleteDo();
+                            cp.execute(h_vbeln,h_posnr);
+                        }
+                    });
+                    builder.setNegativeButton("ยกเลิก", new DialogInterface.OnClickListener() {
+                        @Override
+                        public void onClick(DialogInterface dialog, int which) {
+                            //dialog.dismiss();
 
-                            }
-                        });
-                        builder.show();
+                        }
+                    });
+                    builder.show();
 
                 }
             }
@@ -392,15 +392,15 @@ public class AddProducts extends AppCompatActivity {
 
         if(rsscan.length()>0){
             this.scanresult = rsscan;
-                if(rsscan.equals(h_matnr.trim())){
-                    AddProScan addProScan = new AddProScan();
-                    addProScan.execute(rsscan,"R"); // retail
-                    split_flag = true;
-                }else{
-                    AddProScan addProScan = new AddProScan();
-                    addProScan.execute(rsscan,"W");
+            if(rsscan.equals(h_matnr.trim())){
+                AddProScan addProScan = new AddProScan();
+                addProScan.execute(rsscan,"R"); // retail
+                split_flag = true;
+            }else{
+                AddProScan addProScan = new AddProScan();
+                addProScan.execute(rsscan,"W");
 
-                }
+            }
 
 
             this.hideEdt.setText("");
@@ -572,8 +572,8 @@ public class AddProducts extends AppCompatActivity {
                             }
                             rweight = rweight*rqty;
 */
-                           //  Log.d("XX-query",sqlPcs);
-                           //  Log.d("XX-qmat",qmatcode);
+                            //  Log.d("XX-query",sqlPcs);
+                            //  Log.d("XX-qmat",qmatcode);
 
                             shn = rmd_charge + "-" + r_bundle;
                             sqty = r_qty;
@@ -768,34 +768,34 @@ public class AddProducts extends AppCompatActivity {
         if(eDup==0 && eCar==0 && notFound ==0 && misMat ==0 && nomat==0 && app==0){
             msg = itxt+"\n\n"+"Code "+scanresult;
         }
-            if(eCar == 1){
-                msg = "รถยังไม่ได้ชั่งเข้า ไม่สามารถทำรายการได้";
-            } else if (eCar ==2){
-                msg = "รถชั่งออกไปแล้ว ไม่สามารถทำรายการได้";
-            }else {
-                if (notFound == 1) {
-                    msg = "ไม่พบข้อมูลที่สแกน !" + "\n\n" + "Code " + scanresult;
-                } else {
+        if(eCar == 1){
+            msg = "รถยังไม่ได้ชั่งเข้า ไม่สามารถทำรายการได้";
+        } else if (eCar ==2){
+            msg = "รถชั่งออกไปแล้ว ไม่สามารถทำรายการได้";
+        }else {
+            if (notFound == 1) {
+                msg = "ไม่พบข้อมูลที่สแกน !" + "\n\n" + "Code " + scanresult;
+            } else {
 
-                        if(app == 1) {
-                            msg = "ตั๋วนี้ถูกปิดจบไปแล้ว โดย \n" +h_aprby+ " เวลา "+h_apr+"\n\n" + "Code " + scanresult;
-                        }
-                        else if (eDup == 1) {
-                            msg = "ซ้ำ HN " + dCharge + "-" + dBundle + "\nสินค้า : " + dSize + "\nเอกสาร : " + dVbeln + " " + "\nโดย " + dUser.substring(0, dUser.length() - 4) + "\nวันที่ " + dStamp.substring(0, 16) + "\n\n" + "Code " + scanresult;
-                        } else if (misMat == 1) {
-                            msg = "ชนิดสินค้าไม่ตรงกับเอกสาร \n" + "เอกสาร " + h_matnr + "\n" + "ยิงได้ " + matcode + "\n\n" + "Code " + scanresult;
-                        } else if (nomat == 1) {
-                            msg = "ไม่พบข้อมูล Material Code" + "\n\n" + "Code " + scanresult;
-                        } else if (qi == 1) {
-                            msg = "ไม่สามารถขึ้นของเกรด QI ได้" + "\n\n" + "Code " + scanresult;
-                        }
+                if(app == 1) {
+                    msg = "ตั๋วนี้ถูกปิดจบไปแล้ว โดย \n" +h_aprby+ " เวลา "+h_apr+"\n\n" + "Code " + scanresult;
+                }
+                else if (eDup == 1) {
+                    msg = "ซ้ำ HN " + dCharge + "-" + dBundle + "\nสินค้า : " + dSize + "\nเอกสาร : " + dVbeln + " " + "\nโดย " + dUser.substring(0, dUser.length() - 4) + "\nวันที่ " + dStamp.substring(0, 16) + "\n\n" + "Code " + scanresult;
+                } else if (misMat == 1) {
+                    msg = "ชนิดสินค้าไม่ตรงกับเอกสาร \n" + "เอกสาร " + h_matnr + "\n" + "ยิงได้ " + matcode + "\n\n" + "Code " + scanresult;
+                } else if (nomat == 1) {
+                    msg = "ไม่พบข้อมูล Material Code" + "\n\n" + "Code " + scanresult;
+                } else if (qi == 1) {
+                    msg = "ไม่สามารถขึ้นของเกรด QI ได้" + "\n\n" + "Code " + scanresult;
+                }
 
-                    }
+            }
 
                     /*else if (stock == 1) {
                         msg = "ขึ้นของเกิน STOCK\nHN: "+hn+"\nขึ้น : "+qty+" เส้น" + "\nSTOCK : เส้น"+"\n\n" + "Code " + scanresult;
                     }*/
-            }
+        }
 
         new AlertDialog.Builder(context)
 
@@ -863,15 +863,15 @@ public class AddProducts extends AppCompatActivity {
             tv_splittxt.setVisibility(View.GONE);
             btn_split.setText("เต็มมัด");
 
-           // Log.d("unit",h_unit);
+            // Log.d("unit",h_unit);
 
             if(h_unit.equals("KG")){
-                    unit =" KG.";
-                }else if(h_unit.equals("ROL")){
-                    unit =" ม้วน";
-                }else if(h_unit.equals("PC")){
-                    unit =" เส้น.";
-                }
+                unit =" KG.";
+            }else if(h_unit.equals("ROL")){
+                unit =" ม้วน";
+            }else if(h_unit.equals("PC")){
+                unit =" เส้น.";
+            }
 
 
 
@@ -1233,7 +1233,7 @@ public class AddProducts extends AppCompatActivity {
 
         String[] from = {"LGORT","CHARG","qty"};
         int[] views = {R.id.stock_loc,R.id.stock_batch ,R.id.stock_qty  };
-            final SimpleAdapter AdapVbeln = new SimpleAdapter(AddProducts.this,
+        final SimpleAdapter AdapVbeln = new SimpleAdapter(AddProducts.this,
                 stocklist, R.layout.adp_list_stock, from,
                 views){
             @Override
@@ -1338,8 +1338,8 @@ public class AddProducts extends AppCompatActivity {
                 String qqty ;
                 String qqweight;
 
-                    qqty = eqty.getText().toString().trim();
-                    qqweight = qweight.getText().toString().trim();
+                qqty = eqty.getText().toString().trim();
+                qqweight = qweight.getText().toString().trim();
 
 
                 AdjItem adji = new AdjItem();
@@ -1555,12 +1555,11 @@ public class AddProducts extends AppCompatActivity {
         protected void onPostExecute(String r) {
             pbbar.setVisibility(View.GONE);
             Toast.makeText(AddProducts.this, r, Toast.LENGTH_SHORT).show();
-           // Toast.makeText(AddProducts.this, "HAPR : "+h_apr, Toast.LENGTH_SHORT).show();
+            // Toast.makeText(AddProducts.this, "HAPR : "+h_apr, Toast.LENGTH_SHORT).show();
             if(isSuccess==true) {
 
                 FillList fillList = new FillList();
                 fillList.execute(g_vbeln.trim(),g_posnr.trim());
-
 
             }
 
@@ -1640,7 +1639,7 @@ public class AddProducts extends AppCompatActivity {
                         case "4" : cgrade = "Y1";
                             break;
                     }   //pickI.execute(pickmatnr,pickqty,pick_rmd_charge,pick_rmd_bundle);
-                        //                  0        1            2               3
+                    //                  0        1            2               3
                     setErDup(0);/*setErCar(0);*/setErNm(0);setErMm(0);setErNf(0);
 
                     String checkDup = "Select top 1 * from tbl_shipment_item where charge = '" + params[2].trim() + "' and bundle  = '"+params[3].trim()+"' and mat_code = '"+params[0].trim()+"' and  split_bundle = 0 and left(vbeln,1) <> '3'  order by add_stamp desc  ";
@@ -1680,18 +1679,18 @@ public class AddProducts extends AppCompatActivity {
 
                     if (getErDup() == 0 && getErCar()==0 && getErNf() == 0 && getErMm() == 0 && getErNm() == 0 && getErApp() == 0) {
 
-                    String pinsrt = "insert into tbl_shipment_item (VBELN,POSNR,charge,bundle,grade,size,weight," +
-                            "location,add_stamp,item_barcode,user_add,del_stamp,del_user,qty,unit,mat_code,WADAT," +
-                            "carlicense,DocumentId,qa_grade,KUNNR,AR_NAME,split_bundle,rmd_date) " +
-                            "values ('" + h_vbeln + "','" + h_posnr + "','" +params[2]+"','" + params[3] + "',NULL," +
-                            "'" + h_arktx + "','" + calweight + "','" + usrHelper.getPlant() + "',current_timestamp,'"+params[4]+"'+''+convert(nvarchar(30),(select max(item_id)+1 from tbl_shipment_item)),'" + user + "_" + ver + "'," +
-                            "NULL,NULL,'" + params[1] + "','" + h_unit + "','" + h_matnr + "','" + h_wadatx + "','" + rfscar + "','" + rfsdocid + "'," +
-                            "'" + cgrade + "','" + h_kunnr + "','" + h_ar_name + "',"+maxsplt+",NULL)";
+                        String pinsrt = "insert into tbl_shipment_item (VBELN,POSNR,charge,bundle,grade,size,weight," +
+                                "location,add_stamp,item_barcode,user_add,del_stamp,del_user,qty,unit,mat_code,WADAT," +
+                                "carlicense,DocumentId,qa_grade,KUNNR,AR_NAME,split_bundle,rmd_date) " +
+                                "values ('" + h_vbeln + "','" + h_posnr + "','" +params[2]+"','" + params[3] + "',NULL," +
+                                "'" + h_arktx + "','" + calweight + "','" + usrHelper.getPlant() + "',current_timestamp,'"+params[4]+"'+''+convert(nvarchar(30),(select max(item_id)+1 from tbl_shipment_item)),'" + user + "_" + ver + "'," +
+                                "NULL,NULL,'" + params[1] + "','" + h_unit + "','" + h_matnr + "','" + h_wadatx + "','" + rfscar + "','" + rfsdocid + "'," +
+                                "'" + cgrade + "','" + h_kunnr + "','" + h_ar_name + "',"+maxsplt+",NULL)";
 
-                    PreparedStatement preparedStatement = con.prepareStatement(pinsrt);
-                    preparedStatement.executeUpdate();
-                    z = "บันทึกสำเร็จ";
-                    isSuccess = true;
+                        PreparedStatement preparedStatement = con.prepareStatement(pinsrt);
+                        preparedStatement.executeUpdate();
+                        z = "บันทึกสำเร็จ";
+                        isSuccess = true;
                     }
                     else{
                         isSuccess = false;
@@ -1727,7 +1726,10 @@ public class AddProducts extends AppCompatActivity {
             btn_complete.setVisibility(View.GONE);
             btn_del.setVisibility(View.VISIBLE);
             btn_split.setVisibility(View.VISIBLE);
-            btn_pick.setVisibility(View.VISIBLE);
+            if(usrHelper.getLevel().equals("10")){
+                btn_pick.setVisibility(View.VISIBLE);
+            }
+
         }
 
 
