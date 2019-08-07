@@ -46,7 +46,7 @@ public class ar_list extends AppCompatActivity {
     Line sLine ;
     ProgressBar pbbar;
     ListView list_vbeln ;
-    Button q_btn_save,closeBtn;
+    Button q_btn_save,closeBtn,closedBtn;
     EditText q_lfill ;
     TextView kunnr,vbeln,carlicense,q_remark,q_lock;
     String h_apr,h_aprby,h_kunnr,h_vbeln,h_carlicense,g_vbeln,h_matnr,h_arktx,h_documentid,h_lfimg,h_unit,h_divqty;
@@ -77,6 +77,7 @@ public class ar_list extends AppCompatActivity {
 
 
         closeBtn =(Button)findViewById(R.id.closeBtn);
+        closedBtn =(Button)findViewById(R.id.closedBtn);
         kunnr = (TextView)findViewById(R.id.kunnr);
         vbeln = (TextView)findViewById(R.id.vbeln);
         carlicense = (TextView)findViewById(R.id.carlicense);
@@ -232,11 +233,26 @@ public class ar_list extends AppCompatActivity {
                 if (con == null) {
                     z = "Error in connection with SQL server";
                 } else {
+                    String vw = "";
+                    switch (usrHelper.getPlant()){
+                        case "ZUBB" : vw = "vw_wsum_p8";
+                            break;
+                        case "SPN" : vw = "vw_wsum_p8";
+                            break;
+                        case "SPS" : vw = "vw_wsum_sps";
+                            break;
+                        case "OPS" : vw = "vw_wsum_ops";
+                            break;
+                        case "RS" : vw = "vw_wsum_p8";
+                            break;
+                        default: vw ="vw_wsum_p8";
+                    }
 
-                    String query = " SELECT * FROM vw_wsum_p8 where vbeln = '"+params[0].trim()+"' ";
+                    String query = " SELECT * FROM "+vw+" where vbeln = '"+params[0].trim()+"' ";
 
                     PreparedStatement ps = con.prepareStatement(query);
                     ResultSet rs = ps.executeQuery();
+                    //Log.d("query",query);
 
                     vbelnlist.clear();
                     while (rs.next()) {
@@ -267,7 +283,7 @@ public class ar_list extends AppCompatActivity {
                         h_divqty = "0" ;
                     }
 
-                    String qapr = "SELECT max(ApproveOn) as ApproveOn ,max(ApproveBy) as ApproveBy from tbl_shipmentplan where vbeln = '"+h_vbeln+"' " ;
+                    String qapr = "SELECT top 1 ApproveOn ,ApproveBy from tbl_shipmentplan where vbeln = '"+h_vbeln+"'  order by 1 asc " ;
                     PreparedStatement aps = con.prepareStatement(qapr);
                     ResultSet ars = aps.executeQuery();
 
@@ -482,7 +498,7 @@ public class ar_list extends AppCompatActivity {
                     z = "Error in connection with SQL server";
                 } else {
 
-                    String query = "update tbl_shipmentplan  set ApproveOn  = CURRENT_TIMESTAMP , ApproveBy = '"+usrHelper.getUserName()+"' WHERE vbeln = '"+h_vbeln+"'";
+                    String query = "update tbl_shipmentplan  set ApproveOn  = CURRENT_TIMESTAMP , ApproveBy = '"+usrHelper.getUserName()+"' WHERE vbeln = '"+h_vbeln+"' and ApproveBy is null and ApproveOn is null";
                     PreparedStatement preparedStatement = con.prepareStatement(query);
                     preparedStatement.executeUpdate();
                     z = "ปิดจบสำเร็จ";
@@ -525,6 +541,7 @@ public class ar_list extends AppCompatActivity {
             VbelnFList fillList = new VbelnFList();
             fillList.execute(g_vbeln.trim());
 
+
         }
         @Override
         protected String doInBackground(String... params) {
@@ -547,6 +564,11 @@ public class ar_list extends AppCompatActivity {
                         String query = "update tbl_shipmentplan set "+lock+" where vbeln = '"+h_vbeln+"' and posnr = '"+params[0]+"'";
                         PreparedStatement preparedStatement = con.prepareStatement(query);
                         preparedStatement.executeUpdate();
+
+                        String ulockApp = "update tbl_shipmentplan set ApproveOn = NULL , ApproveBy = NULL  where vbeln = '"+h_vbeln+"' and posnr = '"+params[0]+"'";
+                        PreparedStatement pstulockApp = con.prepareStatement(ulockApp);
+                        pstulockApp.executeUpdate();
+
                     }
 
                     String qDIVQTY = "update tbl_shipmentplan set DIVQTY = "+params[2]+" where vbeln = '"+h_vbeln+"' and posnr = '"+params[0]+"'";
@@ -618,14 +640,17 @@ public class ar_list extends AppCompatActivity {
     }
 
     void checkComplete(String cStat){
-        if(usrHelper.getPlant().equals("RS") || usrHelper.getUserName().equals("Wassana.k")){
+        if(!usrHelper.getLevel().equals("0") || usrHelper.getPlant().equals("OPS") || usrHelper.getPlant().equals("SPS") || usrHelper.getPlant().equals("SPN") || usrHelper.getPlant().equals("RS") || usrHelper.getUserName().equals("Wassana.k")){
 
-            closeBtn.setVisibility(View.VISIBLE);
+
             if(cStat!=null){
-                closeBtn.setText("ปิดจบเรียบร้อยแล้ว");
-                closeBtn.setEnabled(false);
-                closeBtn.setTextColor(Color.parseColor("BLACK"));
-                closeBtn.setBackgroundColor(Color.parseColor("#999999"));
+                closedBtn.setVisibility(View.VISIBLE);
+                closeBtn.setVisibility(View.GONE);
+
+            }else{
+                closedBtn.setVisibility(View.GONE);
+                closeBtn.setVisibility(View.VISIBLE);
+
             }
         }else{
             closeBtn.setVisibility(View.GONE);

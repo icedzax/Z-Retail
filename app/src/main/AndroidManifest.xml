@@ -16,6 +16,10 @@
         android:supportsRtl="true"
         android:theme="@style/AppTheme">
         <activity
+            android:name=".CompleteDo"
+            android:label="@string/title_activity_complete_do"
+            android:theme="@style/AppTheme.NoActionBar"></activity>
+        <activity
             android:name=".MainActivity"
             android:label="@string/app_name"
             android:theme="@style/AppTheme.NoActionBar" />
@@ -49,7 +53,6 @@
             android:name=".ar_list"
             android:label="@string/title_activity_ar_list"
             android:theme="@style/AppTheme.NoActionBar" />
-
     </application>
 
 </manifest>

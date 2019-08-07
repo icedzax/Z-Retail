@@ -140,7 +140,7 @@ public class Line {
 
             InputStream is = null;
             String URL = arg[0];
-            Log.d(LOG_TAG, "URL: " + URL);
+          //  Log.d(LOG_TAG, "URL: " + URL);
             String res = "";
 
 
@@ -163,7 +163,7 @@ public class Line {
         protected void onPostExecute(String result) {
             super.onPostExecute(result);
 
-            Log.d(LOG_TAG, "Result: " + result);
+          //  Log.d(LOG_TAG, "Result: " + result);
         }
     }
 

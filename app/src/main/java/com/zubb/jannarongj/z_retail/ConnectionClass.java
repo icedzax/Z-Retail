@@ -15,39 +15,28 @@ import java.sql.SQLException;
  */
 public class ConnectionClass {
 
-    public static String getUip() {
-        if(uip==null){
-            return "192.168.100.222";
-        }else{
-            return uip;
-        }
+
+    public static String getIp() {
+        return ip;
     }
 
-    public static void setUip(String uip) {
-        ConnectionClass.uip = uip;
+    public static void setIp(String ip) {
+        ConnectionClass.ip = ip;
     }
 
-    public static String getUpass() {
-        if(upass==null){
-            return "";
-        }else{
-            return upass;
-        }
+    static String ip;
+
+    public static String getPassword() {
+        return password;
     }
 
-    public static void setUpass(String upass) {
-        ConnectionClass.upass = upass;
-    }
-
-    public static String uip ;
-    public static String upass ;
+    static String password = "" ;
 
 
-    String ip = "192.168.100.222";
+
     String classs = "net.sourceforge.jtds.jdbc.Driver";
     String db = "PP";
     String un = "sa";
-    String password = "";
 
 
 
@@ -60,12 +49,23 @@ public class ConnectionClass {
         Connection conn = null;
         String ConnURL = null;
 
+
+
+        if(getIp().equals("116")){
+            password = "sipco77";
+        }else{
+            password = "";
+        }
+
+
+       // Log.d("ip",getIp()+"\n"+getPassword());
+
         try {
 
             Class.forName(classs);
-            ConnURL = "jdbc:jtds:sqlserver://" + getUip() + ";"
+            ConnURL = "jdbc:jtds:sqlserver://192.168." +getIp()+ ".222;"
                     + "databaseName=" + db + ";user=" + un + ";password="
-                    + getUpass() + ";";
+                    + getPassword() + ";";
             conn = DriverManager.getConnection(ConnURL);
         } catch (SQLException se) {
             Log.e("ERROR", se.getMessage());
@@ -76,6 +76,8 @@ public class ConnectionClass {
         }
         return conn;
     }
+
+
 
 
 

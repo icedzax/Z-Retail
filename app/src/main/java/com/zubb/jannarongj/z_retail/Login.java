@@ -52,7 +52,7 @@ public class Login extends AppCompatActivity {
         bd = (Button) findViewById(R.id.bd);
         pbbar.setVisibility(View.GONE);
         gver = vers.Version;
-        ver.setText("ver : "+gver+" ");
+        ver.setText("ver : "+gver+" - "+connectionClass.getIp());
         btnLogin.setOnClickListener(new View.OnClickListener() {
 
             @Override

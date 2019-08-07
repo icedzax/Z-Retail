@@ -16,6 +16,17 @@ public class UserHelper {
     static String perfsName = "UserHelper";
     static int perfsMode = 0;
 
+    public static String getVw_name() {
+        return vw_name;
+    }
+
+    public static void setVw_name(String vw_name) {
+
+        UserHelper.vw_name = vw_name;
+    }
+
+    static String vw_name ;
+
     public UserHelper(Context context) {
         this.context = context;
         this.sharedPerfs = this.context.getSharedPreferences(perfsName, perfsMode);

@@ -81,6 +81,21 @@
             android:orientation="horizontal"
             android:visibility="visible">
 
+            <Button
+                android:id="@+id/closedBtn"
+                style="@style/Widget.AppCompat.Button.Colored"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:background="#ADADAD"
+                android:enabled="false"
+                android:text="ปิดจบเรียบรอยแล้ว"
+                android:textAlignment="center"
+                android:textColor="#000000"
+                android:textColorLink="#000000"
+                android:textSize="25sp"
+                android:textStyle="bold"
+                android:visibility="gone" />
 
             <Button
                 android:id="@+id/closeBtn"
@@ -92,7 +107,7 @@
                 android:textAlignment="center"
                 android:textSize="25sp"
                 android:textStyle="bold"
-                android:visibility="invisible" />
+                android:visibility="gone" />
         </LinearLayout>
     </LinearLayout>
 

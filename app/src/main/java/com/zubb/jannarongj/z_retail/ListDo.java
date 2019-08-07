@@ -41,6 +41,7 @@ public class ListDo extends AppCompatActivity {
     ListView lstdo;
     EditText searchBox;
     String plant ,dbView;
+    Button completeDo;
 
     public String getFilter() {
         return filter;
@@ -78,6 +79,7 @@ public class ListDo extends AppCompatActivity {
         pbbar.setVisibility(View.GONE);
         lstdo = (ListView) findViewById(R.id.lstdo);
         btnSearch = (Button) findViewById(R.id.btnSearch);
+        completeDo = (Button)findViewById(R.id.allcbtn);
 
         tgg1 = (ToggleButton) findViewById(R.id.tgg1);
         tgg2 = (ToggleButton) findViewById(R.id.tgg2);
@@ -106,6 +108,20 @@ public class ListDo extends AppCompatActivity {
         FillList fillList = new FillList();
         fillList.execute(getFilter(),getFilvbeln(),plant);
         tgg1.setChecked(true);
+
+        if(!usrHelper.getLevel().equals("0") || usrHelper.getPlant().equals("OPS") || usrHelper.getPlant().equals("SPS") || usrHelper.getPlant().equals("SPN") || usrHelper.getPlant().equals("RS") || usrHelper.getUserName().equals("Wassana.k")){
+            completeDo.setVisibility(View.VISIBLE);
+        }
+
+        completeDo.setOnClickListener(new View.OnClickListener() {
+
+            @Override
+            public void onClick(View v) {
+                Intent i = new Intent(ListDo.this, CompleteDo.class);
+                startActivity(i);
+
+            }
+        });
 
         btnSearch.setOnClickListener(new View.OnClickListener() {
             String getSearch;
@@ -291,18 +307,20 @@ public class ListDo extends AppCompatActivity {
                     String having = "";
                     String vbeln = "";
                     String plant = "";
+                    String vw = "";
 
                     switch (params[2]){
-                        case "ZUBB" : plant = " and s.werks in ('1010','9010')  ";
+                        case "ZUBB" : plant = " and s.werks in ('1010','9010') "; vw = "gr_shipmentplan3";
                             break;
-                        case "SPN" : plant = " and s.werks in ('1050','9050') ";
+                        case "SPN" : plant = " and s.werks in ('1050','9050') "; vw = "gr_shipmentplan3";
                             break;
-                        case "SPS" : plant = " and s.werks in ('1040','9040') ";
+                        case "SPS" : plant = " and s.werks in ('1040','9040') "; vw = "gr_shipmentplan_sps";
                             break;
-                        case "OPS" : plant = " and s.werks in ('2010','9060','1020','9020') ";
+                        case "OPS" : plant = " and s.werks in ('2010','9060','1020','9020') "; vw = "gr_shipmentplan_ops";
                             break;
-                        case "RS" : plant = " and s.ship_point ='1012' ";
+                        case "RS" : plant = " and s.ship_point ='1012' "; vw = "gr_shipmentplan3";
                             break;
+                                default: vw ="gr_shipmentplan3";
                     }
 
                     if(params[1]==null || params[1].equals("")){
@@ -324,13 +342,13 @@ public class ListDo extends AppCompatActivity {
                     }
 
                     String query = "SELECT s.WADAT,s.VBELN,s.AR_NAME,s.CARLICENSE " +
-                            "FROM gr_shipmentplan3 as s LEFT JOIN dbo.tbl_shipment_item as i " +
+                            "FROM "+vw+" as s LEFT JOIN dbo.tbl_shipment_item as i " +
                             "on i.VBELN = s.VBELN and i.POSNR = s.POSNR " +
                             "where  s.VBELN is not null and left(s.MATNR,2) not in ('BL','SC') " +plant+ where+ " " + vbeln +
                             "group by s.VBELN,s.AR_NAME,s.CARLICENSE,s.WADAT " +having+
                             "order by 1 desc ";
 
-                    Log.d("query",query);
+                    //Log.d("query",query);
 
                     PreparedStatement ps = con.prepareStatement(query);
                     ResultSet rs = ps.executeQuery();

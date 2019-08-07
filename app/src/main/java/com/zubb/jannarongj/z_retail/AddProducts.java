@@ -76,6 +76,7 @@ public class AddProducts extends AppCompatActivity {
     String rmd_remark;
     String bar_id,dSize,dBar_id,dCharge,dBundle,dVbeln,dUser,dStamp;
     String hm,sm,userPlant,rfsdocid,rfscar;
+    String vw ;
     int cqty=0,cweight=0;
     int tr = 4 ;
 
@@ -232,6 +233,22 @@ public class AddProducts extends AppCompatActivity {
 
         user = usrHelper.getUserName();
         ver = usrHelper.getVer();
+
+
+        switch (usrHelper.getPlant()){
+            case "ZUBB" : vw = "vw_wsum_p8";
+                break;
+            case "SPN" : vw = "vw_wsum_p8";
+                break;
+            case "SPS" : vw = "vw_wsum_sps";
+                break;
+            case "OPS" : vw = "vw_wsum_ops";
+                break;
+            case "RS" : vw = "vw_wsum_p8";
+                break;
+            default: vw ="vw_wsum_p8";
+        }
+
 
         btn_split.setOnClickListener(new View.OnClickListener() {
 
@@ -662,7 +679,6 @@ public class AddProducts extends AppCompatActivity {
         @Override
         protected void onPostExecute(String r) {
 
-
             //Toast.makeText(ReceiveTransf.this,xx,Toast.LENGTH_SHORT).show();
             if(isSuccess==true) {
 
@@ -705,6 +721,7 @@ public class AddProducts extends AppCompatActivity {
                     while (rms.next()) {
                         maxspl = rms.getInt("split_bundlex");
                     }
+
                     double ntgew = h_ntgew;
                     double limit = h_limit;
                     double rs = h_rs;
@@ -770,9 +787,9 @@ public class AddProducts extends AppCompatActivity {
         }
         if(eCar == 1){
             msg = "รถยังไม่ได้ชั่งเข้า ไม่สามารถทำรายการได้";
-        } else if (eCar ==2){
+        } /*else if (eCar ==2){
             msg = "รถชั่งออกไปแล้ว ไม่สามารถทำรายการได้";
-        }else {
+        }*/else {
             if (notFound == 1) {
                 msg = "ไม่พบข้อมูลที่สแกน !" + "\n\n" + "Code " + scanresult;
             } else {
@@ -806,11 +823,11 @@ public class AddProducts extends AppCompatActivity {
 
                     }
                 })
-               /* .setNegativeButton("ปิด", new DialogInterface.OnClickListener() {
-                    public void onClick(DialogInterface dialog, int which) {
-                        // do nothing
-                    }
-                })  */
+                /* .setNegativeButton("ปิด", new DialogInterface.OnClickListener() {
+                     public void onClick(DialogInterface dialog, int which) {
+                         // do nothing
+                     }
+                 })  */
 
                 .setIcon(android.R.drawable.ic_dialog_alert)
                 .show();
@@ -844,7 +861,6 @@ public class AddProducts extends AppCompatActivity {
             String unit = "";
             int start = stext.trim().indexOf("-")+1;
             int end = stext.trim().length();
-
 
 
             SpannableString svbeln = new SpannableString(stext.trim());
@@ -887,11 +903,11 @@ public class AddProducts extends AppCompatActivity {
                     tv_up.setVisibility(View.VISIBLE);
                     tv_up.setText("ขึ้นของ");
                 }else{
-                    setErCar(2);
+                    /*setErCar(2);
                     tv_wdate2.setVisibility(View.VISIBLE);
                     txtw2.setVisibility(View.VISIBLE);
                     tv_up.setVisibility(View.GONE);
-                    tv_wdate2.setText(h_wdate2);
+                    tv_wdate2.setText(h_wdate2);*/
                 }
             }
 
@@ -987,8 +1003,6 @@ public class AddProducts extends AppCompatActivity {
 
             //Log.d("h_apr", h_apr+" , "+h_aprby);
 
-
-
             pbbar.setVisibility(View.GONE);
 
         }
@@ -1008,9 +1022,11 @@ public class AddProducts extends AppCompatActivity {
                         where = "where vbeln = '" + params[0] + "' and posnr = '" + params[1] + "' ";
                     }
 
-                    String headqry = "select convert(nvarchar(20),cast(wadat as datetime),103) as wadat2 ,*,isnull(NTGEW,0) as NTGEWx ,round(wsum,0) as wsum2,round(asum,0) as asum2 from vw_wsum_p8 " + where ;
+                    String headqry = "select convert(nvarchar(20),cast(wadat as datetime),103) as wadat2 ,*,isnull(NTGEW,0) as NTGEWx ,round(wsum,0) as wsum2,round(asum,0) as asum2 from "+vw+" " + where ;
                     PreparedStatement hps = con.prepareStatement(headqry);
                     ResultSet hrs = hps.executeQuery();
+
+                    //Log.d("query",headqry);
 
                     while (hrs.next()) {
                         h_wadat = hrs.getString("wadat2");
@@ -1415,6 +1431,7 @@ public class AddProducts extends AppCompatActivity {
         cnbtn.setOnClickListener(new View.OnClickListener() {
 
             public void onClick(View v) {
+
                 spltdialog.dismiss();
                 split_flag = false;
                 lvitem.setVisibility(View.VISIBLE);
@@ -1482,7 +1499,6 @@ public class AddProducts extends AppCompatActivity {
                         z = "แก้ไขเรียบร้อยแล้ว";
                         isSuccess = true;
                     }
-
 
 
                     //Log.d("update",query);

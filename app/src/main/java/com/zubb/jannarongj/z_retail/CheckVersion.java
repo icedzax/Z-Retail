@@ -44,18 +44,35 @@ public class CheckVersion extends AppCompatActivity {
 
         WifiManager wm = (WifiManager) getSystemService(WIFI_SERVICE);
         String ip = Formatter.formatIpAddress(wm.getConnectionInfo().getIpAddress());
-        //Log.d("ip",ip.substring(8,11));
+
+
+
+        //ip = "192.168.116.11";
+        if(ip.length()<8){
+            ip = "100";
+        }else{
+            ip = ip.substring(8,11);
+        }
+
+
+
+        if(ip==null || ip.equals("")){
+            ip = "100";
+        }else{
+            if(ip.equals("116")){
+                ip = "116";
+            }else{
+                ip = "100";
+            }
+
+        }
+
+       // Log.d("ip",ip);
 
         vers = new Version();
         connectionClass = new ConnectionClass();
 
-       /* if(ip!= null && ip.substring(8,11).equals("116")){
-            connectionClass.setUip("192.168.116.222");
-            connectionClass.setUpass("sipco77");
-        }else {
-            connectionClass.setUip("192.168.100.222");
-            connectionClass.setUpass("");
-        }*/
+        connectionClass.setIp(ip);
 
         pbbar = (ProgressBar) findViewById(R.id.pbbar);
         cur_app = (TextView) findViewById(R.id.cur_app);
@@ -133,7 +150,7 @@ public class CheckVersion extends AppCompatActivity {
                     String query = "SELECT  top 1 name,version FROM tbl_version_control  where name = '"+app_name+"'  order by id desc " ;
                     PreparedStatement ps = con.prepareStatement(query);
                     ResultSet rs = ps.executeQuery();
-                    Log.d("LOG",query);
+                   // Log.d("LOG",query);
 
 
                     while (rs.next()) {
@@ -182,7 +199,7 @@ public class CheckVersion extends AppCompatActivity {
 
                 msg="Finishing... ";
 
-            }else {
+            }else { //highe hope high hope and you let you go go out again
 
                 msg="Downloading... "+progress[0]+"%";
             }
@@ -259,6 +276,7 @@ public class CheckVersion extends AppCompatActivity {
                 flag = true;
             } catch (Exception e) {
                 //Log.e(TAG, "Update Error: " + e.getMessage());
+
                 flag = false;
             }
             return flag;
