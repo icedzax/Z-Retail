@@ -46,7 +46,6 @@ public class CheckVersion extends AppCompatActivity {
         String ip = Formatter.formatIpAddress(wm.getConnectionInfo().getIpAddress());
 
 
-
         //ip = "192.168.116.11";
         if(ip.length()<8){
             ip = "100";
@@ -55,22 +54,21 @@ public class CheckVersion extends AppCompatActivity {
         }
 
 
-
         if(ip==null || ip.equals("")){
             ip = "100";
         }else{
             if(ip.equals("116")){
                 ip = "116";
-            }else{
-                ip = "100";
-            }
+    }else{
+        ip = "100";
+    }
 
-        }
+}
 
-       // Log.d("ip",ip);
+// Log.d("ip",ip);
 
         vers = new Version();
-        connectionClass = new ConnectionClass();
+                connectionClass = new ConnectionClass();
 
         connectionClass.setIp(ip);
 
@@ -89,7 +87,9 @@ public class CheckVersion extends AppCompatActivity {
 
             @Override
             public void onClick(View v) {
-                getUpdate();
+                //getUpdate();
+                FecthCheck fetchC = new FecthCheck();
+                fetchC.execute("");
             }
         });
 

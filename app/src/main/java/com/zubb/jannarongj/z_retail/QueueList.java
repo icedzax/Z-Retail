@@ -4,10 +4,8 @@ import android.content.Intent;
 import android.graphics.Color;
 import android.os.AsyncTask;
 import android.os.Bundle;
-import android.support.design.widget.FloatingActionButton;
-import android.support.design.widget.Snackbar;
+
 import android.support.v7.app.AppCompatActivity;
-import android.support.v7.widget.Toolbar;
 import android.text.Editable;
 import android.text.TextWatcher;
 import android.util.Log;
@@ -17,11 +15,9 @@ import android.view.WindowManager;
 import android.widget.AdapterView;
 import android.widget.Button;
 import android.widget.EditText;
-import android.widget.LinearLayout;
 import android.widget.ListView;
 import android.widget.ProgressBar;
 import android.widget.SimpleAdapter;
-import android.widget.TextView;
 import android.widget.Toast;
 import android.widget.ToggleButton;
 
@@ -33,7 +29,9 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-public class ListDo extends AppCompatActivity {
+
+public class QueueList extends AppCompatActivity {
+
     UserHelper usrHelper ;
     ConnectionClass connectionClass;
     ToggleButton tgg1, tgg2, tgg3, tgg4,tggP8;
@@ -68,7 +66,7 @@ public class ListDo extends AppCompatActivity {
     }
 
     public static void setFilvbeln(String filvbeln) {
-        ListDo.filvbeln = filvbeln;
+        QueueList.filvbeln = filvbeln;
     }
 
     static String  filvbeln = "";
@@ -77,13 +75,13 @@ public class ListDo extends AppCompatActivity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        setContentView(R.layout.activity_queue_list);
+
 
 
         getWindow().setSoftInputMode(WindowManager.LayoutParams.SOFT_INPUT_STATE_HIDDEN);
         usrHelper = new UserHelper(this);
         connectionClass = new ConnectionClass();
-
-        setContentView(R.layout.activity_list_do);
         //
         pbbar = (ProgressBar) findViewById(R.id.pbbar);
         pbbar.setVisibility(View.GONE);
@@ -128,7 +126,7 @@ public class ListDo extends AppCompatActivity {
 
             @Override
             public void onClick(View v) {
-                Intent i = new Intent(ListDo.this, CompleteDo.class);
+                Intent i = new Intent(QueueList.this, CompleteDo.class);
                 startActivity(i);
 
             }
@@ -280,17 +278,18 @@ public class ListDo extends AppCompatActivity {
         protected void onPostExecute(String r) {
             //Log.d("Zs",z);
             pbbar.setVisibility(View.GONE);
-            Toast.makeText(ListDo.this, r, Toast.LENGTH_SHORT).show();
-           // Toast.makeText(ListDo.this, "getfil : "+getFilter()+"\ngetvbeln : "+getFilvbeln(), Toast.LENGTH_SHORT).show();
+            Toast.makeText(QueueList.this, r, Toast.LENGTH_SHORT).show();
+            // Toast.makeText(ListDo.this, "getfil : "+getFilter()+"\ngetvbeln : "+getFilvbeln(), Toast.LENGTH_SHORT).show();
 
-            String[] from = {"AR_NAME","VBELN","CARLICENSE"};
+            String[] from = {"AR_NAME","PO_NUM","CARLICENSE"};
             int[] views = {R.id.ar_name,R.id.vbeln,R.id.carlicense};
-            final SimpleAdapter ADA = new SimpleAdapter(ListDo.this,
-                    dolist, R.layout.adp_list_ar, from,
+            final SimpleAdapter ADA = new SimpleAdapter(QueueList.this,
+                    dolist, R.layout.adp_list_queue, from,
                     views){
                 @Override
                 public View getView(final int position, View convertView, ViewGroup parent) {
                     View view = super.getView(position, convertView, parent);
+
                     //LinearLayout lnx = (LinearLayout) view.findViewById(R.id.lnx);
 
                     //int lx = Integer.parseInt(dolist.get(position).get("sscan"));
@@ -310,9 +309,9 @@ public class ListDo extends AppCompatActivity {
                                         int arg2, long arg3) {
                     HashMap<String, Object> obj = (HashMap<String, Object>) ADA
                             .getItem(arg2);
-                    String lst_vbeln = (String) obj.get("VBELN");
+                    String lst_vbeln = (String) obj.get("SEQ");
 
-                    Intent i = new Intent(ListDo.this, ar_list_back.class);
+                    Intent i = new Intent(QueueList.this, ar_list.class);
                     i.putExtra("vbeln", lst_vbeln);
 
                     startActivity(i);
@@ -349,15 +348,15 @@ public class ListDo extends AppCompatActivity {
                             break;
                         case "OPS" : plant = " and s.werks in ('2010','9060','1020','9020') "; vw = "gr_shipmentplan_ops";
                             break;
-                        case "RS" : plant = " and s.werks in ('1010','9010') "; vw = "gr_shipmentplan_p1";
+                        case "RS" : plant = " and s.werks in ('1010','9010') "; vw = "gr_shipmentplan3 ";
                             break;
-                                default: vw ="gr_shipmentplan3";
+                        default: vw ="gr_shipmentplan3";
                     }
 
                     if(params[1]==null || params[1].equals("")){
                         vbeln = "";
                     }else{
-                        vbeln = " and s.vbeln like '%"+params[1].trim()+"%' ";
+                        vbeln = " and right(s.po_num,3) like '%"+params[1].trim()+"%' ";
                     }
 
                     switch (params[0]){
@@ -372,11 +371,15 @@ public class ListDo extends AppCompatActivity {
 
                     }
 
-                    String query = "SELECT s.WADAT,s.VBELN,s.AR_NAME,s.CARLICENSE " +
+                    String query = "SELECT s.PO_NUM as SEQ,s.WADAT," +
+                            "case when s.ship_point = '1012' then 'P1'+'-'+right(s.PO_NUM,3) " +
+                            "     when s.ship_point = '1011' then 'P8'+'-'+right(s.PO_NUM,3) else s.ship_point+'-'+right(s.PO_NUM,3) end as PO_NUM ," +
+                            "s.AR_NAME,s.CARLICENSE " +
                             "FROM "+vw+" as s LEFT JOIN dbo.tbl_shipment_item as i " +
                             "on i.VBELN = s.VBELN and i.POSNR = s.POSNR " +
-                            "where  s.VBELN is not null and left(s.MATNR,2) not in ('BL','SC') " +plant+ where+ " " + vbeln +
-                            "group by s.VBELN,s.AR_NAME,s.CARLICENSE,s.WADAT " +having+
+                            "where  s.ship_point is not null and s.wadat  > getdate()-1 and s.PO_NUM is not null and s.VBELN is not null and left(s.MATNR,2) not in ('BL','SC') " +plant+ where+ " " + vbeln +
+                            "group by s.PO_NUM,case when s.ship_point = '1012' then 'P1'+'-'+right(s.PO_NUM,3) " +
+                            " when s.ship_point = '1011' then 'P8'+'-'+right(s.PO_NUM,3) else s.ship_point+'-'+right(s.PO_NUM,3) end,s.AR_NAME,s.CARLICENSE,s.WADAT " +having+
                             "order by 1 desc ";
 
                     Log.d("query",query);
@@ -387,7 +390,9 @@ public class ListDo extends AppCompatActivity {
                     while (rs.next()) {
                         Map<String, String> datanum = new HashMap<String, String>();
                         datanum.put("WADAT", rs.getString("WADAT"));
-                        datanum.put("VBELN", rs.getString("VBELN"));
+                        //datanum.put("VBELN", rs.getString("VBELN"));
+                        datanum.put("PO_NUM", rs.getString("PO_NUM"));
+                        datanum.put("SEQ", rs.getString("SEQ"));
                         datanum.put("AR_NAME", rs.getString("AR_NAME"));
                         datanum.put("CARLICENSE", rs.getString("CARLICENSE"));
 
@@ -404,6 +409,5 @@ public class ListDo extends AppCompatActivity {
             return z;
         }
     }
-
 
 }

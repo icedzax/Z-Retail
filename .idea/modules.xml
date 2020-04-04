@@ -2,9 +2,10 @@
 <project version="4">
   <component name="ProjectModuleManager">
     <modules>
-      <module fileurl="file://$PROJECT_DIR$/Z-Retail.iml" filepath="$PROJECT_DIR$/Z-Retail.iml" />
-      <module fileurl="file://$PROJECT_DIR$/app/app.iml" filepath="$PROJECT_DIR$/app/app.iml" />
-      <module fileurl="file://$PROJECT_DIR$/jtds-1.2.5/jtds-1.2.5.iml" filepath="$PROJECT_DIR$/jtds-1.2.5/jtds-1.2.5.iml" />
+      <module fileurl="file://$PROJECT_DIR$/Z-Retail.iml" filepath="$PROJECT_DIR$/Z-Retail.iml" group="Z-Retail" />
+      <module fileurl="file://$PROJECT_DIR$/app/app.iml" filepath="$PROJECT_DIR$/app/app.iml" group="Z-Retail/app" />
+      <module fileurl="file://$PROJECT_DIR$/jtds-1.2.5/jtds-1.2.5.iml" filepath="$PROJECT_DIR$/jtds-1.2.5/jtds-1.2.5.iml" group="Z-Retail/jtds-1.2.5" />
+      <module fileurl="file://$PROJECT_DIR$/zbar/zbar.iml" filepath="$PROJECT_DIR$/zbar/zbar.iml" group="Z-Retail/zbar" />
     </modules>
   </component>
 </project>

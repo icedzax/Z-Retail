@@ -1,6 +1,5 @@
 package com.zubb.jannarongj.z_retail;
 
-import android.app.Activity;
 import android.app.AlertDialog;
 import android.app.Dialog;
 import android.content.DialogInterface;
@@ -12,14 +11,10 @@ import android.support.v7.app.AppCompatActivity;
 import android.text.Editable;
 import android.text.TextWatcher;
 import android.util.Log;
-
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.Window;
 import android.view.WindowManager;
-import android.view.animation.AlphaAnimation;
-import android.view.animation.Animation;
-import android.view.inputmethod.InputMethodManager;
 import android.widget.AdapterView;
 import android.widget.Button;
 import android.widget.EditText;
@@ -39,7 +34,7 @@ import java.util.List;
 import java.util.Map;
 
 
-public class ar_list extends AppCompatActivity {
+public class ar_list_back extends AppCompatActivity {
 
     UserHelper usrHelper ;
     ConnectionClass connectionClass;
@@ -54,12 +49,11 @@ public class ar_list extends AppCompatActivity {
     String rm ="";
 
     List<Map<String, String>> vbelnlist  = new ArrayList<Map<String, String>>();
-    List<Map<String, String>> picklist  = new ArrayList<Map<String, String>>();
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_ar_list);
+        setContentView(R.layout.activity_ar_list_back);
 
         getWindow().setSoftInputMode(WindowManager.LayoutParams.SOFT_INPUT_STATE_HIDDEN);
         if (savedInstanceState == null) {
@@ -79,8 +73,8 @@ public class ar_list extends AppCompatActivity {
 
         closeBtn =(Button)findViewById(R.id.closeBtn);
         closedBtn = (Button)findViewById(R.id.closedBtn);
-        kunnr = (TextView)findViewById(R.id.seq);
-        //vbeln = (TextView)findViewById(R.id.vbeln);
+        kunnr = (TextView)findViewById(R.id.kunnr);
+        vbeln = (TextView)findViewById(R.id.vbeln);
         carlicense = (TextView)findViewById(R.id.carlicense);
         pbbar = (ProgressBar) findViewById(R.id.pbbar);
         pbbar.setVisibility(View.GONE);
@@ -100,7 +94,7 @@ public class ar_list extends AppCompatActivity {
 
 
                 AlertDialog.Builder builder =
-                        new AlertDialog.Builder(ar_list.this);
+                        new AlertDialog.Builder(ar_list_back.this);
                 builder.setTitle("ปิดจบ");
                 builder.setMessage("ยืนยันการปิดจบ ?");
                 builder.setPositiveButton("ตกลง", new DialogInterface.OnClickListener() {
@@ -138,8 +132,8 @@ public class ar_list extends AppCompatActivity {
         @Override
         protected void onPostExecute(String r) {
 
-            kunnr.setText(g_vbeln);
-            //vbeln.setText(h_vbeln);
+            kunnr.setText(h_kunnr);
+            vbeln.setText(h_vbeln);
             carlicense.setText(h_carlicense);
 
             if(h_documentid==null || h_documentid.equals("")){
@@ -148,8 +142,8 @@ public class ar_list extends AppCompatActivity {
 
             String[] from = {"posnr","arktx"};
             int[] views = {R.id.lposnr,R.id.larktx};
-            final SimpleAdapter ADA = new SimpleAdapter(ar_list.this,
-                    vbelnlist, R.layout.adp_new_do_list, from,
+            final SimpleAdapter ADA = new SimpleAdapter(ar_list_back.this,
+                    vbelnlist, R.layout.adp_new_do_list_back, from,
                     views){
                 @Override
                 public View getView(final int position, View convertView, ViewGroup parent) {
@@ -176,9 +170,9 @@ public class ar_list extends AppCompatActivity {
                                         int arg2, long arg3) {
                     HashMap<String, Object> obj = (HashMap<String, Object>) ADA
                             .getItem(arg2);
-                    Intent i = new Intent(ar_list.this, AddProducts.class);
-                    i.putExtra("posnr", (String) obj.get("pposnr"));
-                    i.putExtra("vbeln", (String) obj.get("vbeln"));
+                    Intent i = new Intent(ar_list_back.this, AddProducts.class);
+                    i.putExtra("posnr", (String) obj.get("posnr"));
+                    i.putExtra("vbeln", h_vbeln);
 
                     startActivity(i);
 
@@ -248,7 +242,7 @@ public class ar_list extends AppCompatActivity {
                         default: vw ="vw_wsum_p8";
                     }
 
-                    String query = " SELECT * FROM "+vw+" where po_num = '"+params[0].trim()+"' ";
+                    String query = " SELECT * FROM "+vw+" where vbeln = '"+params[0].trim()+"' ";
 
                     PreparedStatement ps = con.prepareStatement(query);
                     ResultSet rs = ps.executeQuery();
@@ -259,13 +253,11 @@ public class ar_list extends AppCompatActivity {
 
                         Map<String, String> datanums = new HashMap<String, String>();
                         datanums.put("arktx", rs.getString("arktx"));
-                        datanums.put("posnr", rs.getString("vbeln")+"-"+rs.getString("posnr"));
+                        datanums.put("posnr", rs.getString("posnr"));
                         datanums.put("sscan", rs.getString("sscan"));
-                        datanums.put("pposnr", rs.getString("posnr"));
                         datanums.put("LOCK", rs.getString("LOCK"));
                         datanums.put("LFIMG", rs.getString("LFIMG"));
                         datanums.put("DIVQTY", rs.getString("DIVQTY"));
-                        datanums.put("vbeln", rs.getString("vbeln"));
 
                         vbelnlist.add(datanums);
 
@@ -314,7 +306,7 @@ public class ar_list extends AppCompatActivity {
     }
 
     public void onRemarkClick(){
-        AlertDialog.Builder builder = new AlertDialog.Builder(ar_list.this);
+        AlertDialog.Builder builder = new AlertDialog.Builder(ar_list_back.this);
         builder.setTitle("สาเหตุที่ปลดล็อค DO");
         String[] remark = {"ตัวแปร","ลูกค้าเปลี่ยน","เหล็กมีปัญหา","ระบบมีปัญหา","ตาชั่งมีปัญหา","ขึ้นเร่งด่วน รอบิล","ลืมยิง/ยิงไม่ครบ","เกินในมัด","เปลี่ยนเหล็ก","น้ำหนักเกิน"};
         builder.setItems(remark, new DialogInterface.OnClickListener() {
@@ -378,7 +370,7 @@ public class ar_list extends AppCompatActivity {
 
     public void unlockDo(final String qposnr, final String qarktx, final String qlock,final  String qlfimg){
 
-        final Dialog qdialog = new Dialog(ar_list.this);
+        final Dialog qdialog = new Dialog(ar_list_back.this);
         qdialog.requestWindowFeature(Window.FEATURE_NO_TITLE);
         qdialog.setContentView(R.layout.dialog_seq);
 
@@ -479,7 +471,7 @@ public class ar_list extends AppCompatActivity {
         @Override
         protected void onPostExecute(String r) {
             pbbar.setVisibility(View.GONE);
-            Toast.makeText(ar_list.this, r, Toast.LENGTH_SHORT).show();
+            Toast.makeText(ar_list_back.this, r, Toast.LENGTH_SHORT).show();
 
             if(isSuccess==true) {
 
@@ -538,7 +530,7 @@ public class ar_list extends AppCompatActivity {
         protected void onPostExecute(String r) {
             pbbar.setVisibility(View.GONE);
 
-            Toast.makeText(ar_list.this, r, Toast.LENGTH_SHORT).show();
+            Toast.makeText(ar_list_back.this, r, Toast.LENGTH_SHORT).show();
 
             if(isSuccess==true){
                 //if(uremark.equals("ตาชั่งมีปัญหา") || uremark.equals("ระบบชั่งมีปัญหา"))
@@ -595,11 +587,9 @@ public class ar_list extends AppCompatActivity {
     }
 
 
-    public class DetectDo extends AsyncTask<String, String, String> {
+    public class CloseUpdate extends AsyncTask<String, String, String> {
 
         String z = "" ;
-        String fvbeln = "", fposnr = "" , fbar_id, fmat ="";
-
 
         Boolean isSuccess = false ;
 
@@ -612,15 +602,11 @@ public class ar_list extends AppCompatActivity {
         protected void onPostExecute(String r) {
             pbbar.setVisibility(View.GONE);
 
-            Toast.makeText(ar_list.this, r, Toast.LENGTH_SHORT).show();
+            Toast.makeText(ar_list_back.this, r, Toast.LENGTH_SHORT).show();
 
             if(isSuccess==true){
-                Intent i = new Intent(getApplicationContext(), AddProducts.class);
-                i.putExtra("posnr", fposnr);
-                i.putExtra("vbeln", fvbeln);
-                i.putExtra("bar_id", fbar_id);
-
-                startActivity(i);
+                //if(uremark.equals("ตาชั่งมีปัญหา") || uremark.equals("ระบบชั่งมีปัญหา"))
+                //sLine.PushMessage(usrHelper.getUserName(),h_vbeln,h_carlicense,h_kunnr,h_arktx,uremark);
             }
 
             VbelnFList fillList = new VbelnFList();
@@ -635,38 +621,11 @@ public class ar_list extends AppCompatActivity {
                 if (con == null) {
                     z = "Error in connection with SQL server";
                 } else {
-                    String getMat = "";
-                    fbar_id = params[0];
-                    String fMat = "select top 1 mat_code,r_qty from vw_barcode_item where bar_id = '"+params[0]+"' ";
-                    PreparedStatement fps = con.prepareStatement(fMat);
-                    ResultSet frs = fps.executeQuery();
 
-                    while (frs.next()){
-                        getMat = frs.getString("mat_code");
-                    }
+                    String qDIVQTY = "update tbl_shipmentplan set Status = "+params[0]+" ,  where vbeln = '"+h_vbeln+"' and posnr = '"+params[0]+"'";
+                    PreparedStatement qpreparedStatement = con.prepareStatement(qDIVQTY);
+                    qpreparedStatement.executeUpdate();
 
-                    String fDo = "select matnr,vbeln,posnr from tbl_shipment_item where ponum = '"+g_vbeln+"' and mat_code  = '"+getMat+"' ";
-                    PreparedStatement fds = con.prepareStatement(fDo);
-                    ResultSet drs = fds.executeQuery();
-                    int cv = 0;
-                    Map<String, String> mapdocs = new HashMap<String, String>();
-                    picklist.clear();
-                    while (drs.next()){
-
-                        fvbeln = drs.getString("vbeln");
-                        fposnr = drs.getString("posnr");
-                        fmat = drs.getString("matnr");
-
-                        cv++;
-                        mapdocs.put("mat",fmat);
-                        mapdocs.put("vbeln",fvbeln);
-                        mapdocs.put("posnr",fposnr);
-                    }
-                    picklist.add(mapdocs);
-
-                    if(cv>1){
-                        popPickMat(fbar_id);
-                    }
 
                     z = "ปิดจบเรียบร้อย";
                     isSuccess = true;
@@ -677,70 +636,6 @@ public class ar_list extends AppCompatActivity {
             }
             return z;
         }
-    }
-
-    public void popPickMat(final String barid) {
-
-        final Dialog dialog = new Dialog(ar_list.this);
-        dialog.requestWindowFeature(Window.FEATURE_NO_TITLE);
-        dialog.setContentView(R.layout.dialog_pickmat);
-        dialog.setCancelable(true);
-
-        ListView lvpickmat = (ListView) dialog.findViewById(R.id.lvpickmat);
-
-        String[] from = {"arktx","vbeln","ar_name"};
-        int[] views = {R.id.p_arktx,R.id.p_vbeln,R.id.p_arname };
-        final SimpleAdapter ADA = new SimpleAdapter(ar_list.this,
-                picklist, R.layout.adp_list_pickmat, from,
-                views){
-
-            @Override
-            public View getView(int position, View convertView, ViewGroup parent){
-                View view = super.getView(position,convertView,parent);
-                return view;
-            }
-        };
-
-        lvpickmat.setAdapter(ADA);
-        lvpickmat.setOnItemClickListener(new AdapterView.OnItemClickListener() {
-
-            @Override
-            public void onItemClick(AdapterView<?> arg0, View arg1,
-                                    int arg2, long arg3) {
-                HashMap<String, Object> obj = (HashMap<String, Object>) ADA
-                        .getItem(arg2);
-                String pposnr = (String) obj.get("loc");
-                String pvbeln = (String) obj.get("Storage_Bin");
-
-                Intent i = new Intent(getApplicationContext(), AddProducts.class);
-                i.putExtra("posnr", pposnr);
-                i.putExtra("vbeln", pvbeln);
-                i.putExtra("bar_id", barid);
-
-                startActivity(i);
-
-                Animation animation1 = new AlphaAnimation(0.3f, 1.0f);
-                animation1.setDuration(2000);
-                arg1.startAnimation(animation1);
-
-
-
-                dialog.dismiss();
-
-            }
-
-        });
-
-        dialog.setOnCancelListener(new DialogInterface.OnCancelListener() {
-            @Override
-            public void onCancel(DialogInterface dialog) {
-
-
-            }
-        });
-
-        dialog.show();
-
     }
 
     void checkComplete(String cStat){
@@ -760,8 +655,6 @@ public class ar_list extends AppCompatActivity {
             closeBtn.setVisibility(View.GONE);
         }
     }
-
-
 
 }
 

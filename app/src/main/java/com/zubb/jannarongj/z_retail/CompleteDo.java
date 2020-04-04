@@ -315,19 +315,25 @@ public class CompleteDo extends AppCompatActivity {
                     z = "Error in connection with SQL server";
                 } else {
 
-                    String query = "update tbl_shipmentplan  set ApproveOn  = CURRENT_TIMESTAMP , ApproveBy = '"+usrHelper.getUserName()+"' WHERE carlicense = '"+params[0]+"' and werks_to is null and wadat_ist > getdate()-1  and ApproveOn is null";
+                    String query = "update tbl_shipmentplan  set ApproveOn  = CURRENT_TIMESTAMP , ApproveBy = '"+usrHelper.getUserName()+"' WHERE carlicense = '"+params[0]+"' and werks_to is null and wadat_ist > getdate()-1  and ApproveOn is null and  carlicense <> rtrim('') ";
 
                     PreparedStatement preparedStatement = con.prepareStatement(query);
                     preparedStatement.executeUpdate();
+
+                    String qcarvis = "update tbl_shipment_carvisit  set OutTime  = CURRENT_TIMESTAMP WHERE seq in (select distinct(PO_NUM) from tbl_shipmentplan WHERE carlicense = '"+params[0]+"' and werks_to is null and wadat_ist > getdate()-1 and  carlicense <> rtrim('') )";
+                    PreparedStatement pStmcvsi = con.prepareStatement(qcarvis);
+                    pStmcvsi.executeUpdate();
+
+
                     z = "ปิดจบสำเร็จ";
 
-                   // Log.d("query",query);
+              //      Log.d("query",qcarvis);
 
                     isSuccess = true;
                 }
             } catch (Exception ex) {
                 isSuccess = false;
-                z = ex.getMessage().toString();
+                z = "ปิดจบไม่สำเร็จ \n"+ex.getMessage();
                 //z = "ปิดจบไม่สำเร็จ";
             }
 

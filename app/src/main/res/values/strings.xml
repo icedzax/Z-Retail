@@ -1,19 +1,25 @@
 <resources>
-    <string name="app_name">ขึ้นของ 5.0</string>
-    <string name="action_settings">ขึ้นของ 5.0</string>
-    <string name="title_activity_login">ขึ้นของ 5.0</string>
-    <string name="title_activity_checkversion">ขึ้นของ 5.0</string>
-    <string name="title_activity_check_version">ขึ้นของ 5.0</string>
-    <string name="title_activity_retail_list">ขึ้นของ 5.0</string>
-    <string name="title_home">ขึ้นของ 5.0</string>
-    <string name="title_dashboard">ขึ้นของ 5.0</string>
-    <string name="title_notifications">ขึ้นของ 5.0</string>
-    <string name="title_activity_list_do">ขึ้นของ 5.0</string>
-    <string name="title_activity_add_products">ขึ้นของ 5.0</string>
+    <string name="app_name">ขึ้นของ 6.2</string>
+    <string name="action_settings">ขึ้นของ 6.2</string>
+    <string name="title_activity_login">ขึ้นของ 6.2</string>
+    <string name="title_activity_checkversion">ขึ้นของ 6.2</string>
+    <string name="title_activity_check_version">ขึ้นของ 6.2</string>
+    <string name="title_activity_retail_list">ขึ้นของ 6.2</string>
+    <string name="title_home">ขึ้นของ 6.2</string>
+    <string name="title_dashboard">ขึ้นของ 6.2</string>
+    <string name="title_notifications">ขึ้นของ 6.2</string>
+    <string name="title_activity_list_do">ขึ้นของ 6.2</string>
+    <string name="title_activity_add_products">ขึ้นของ 6.2</string>
     <string name="button_text">ปิดจบ</string>
     <string name="button_textf">ปิดจบแล้ว</string>
-    <string name="title_activity_ar_list">ขึ้นของ 5.0</string>
+    <string name="title_activity_ar_list">ขึ้นของ 6.2</string>
     <string name="title_activity_test">Test</string>
-    <string name="title_activity_complete_do">ขึ้นของ 5.0</string>
+    <string name="title_activity_complete_do">ขึ้นของ 6.2</string>
+
+    <!-- TODO: Remove or change this placeholder text -->
+    <string name="hello_blank_fragment">Hello blank fragment</string>
+    <string name="title_activity_qr_cam">QrCam</string>
+    <string name="title_activity_stock">Stock</string>
+    <string name="title_activity_queue_list">QueueList</string>
 
 </resources>

@@ -168,6 +168,7 @@ public class Login extends AppCompatActivity {
 
                     Toast.makeText(Login.this,"รหัสไม่ถูกต้อง",Toast.LENGTH_LONG).show();
                     izeText.setText("");
+
                 }else{
                     Toast.makeText(Login.this,"Network มีปัญหา\nกรุณาตรวจสอบ WIFI",Toast.LENGTH_LONG).show();
                     // izeText.setText("");
@@ -190,6 +191,7 @@ public class Login extends AppCompatActivity {
                     String query = "select * from tbl_id_user where Id ='"+gPass+"'  " ;
                     PreparedStatement ts = con.prepareStatement(query);
                     ResultSet bs = ts.executeQuery();
+                    //Log.d("IDTEST",query);
                     while (bs.next()) {
 
                         username = bs.getString("name");
