@@ -231,7 +231,7 @@ public class ar_list_back extends AppCompatActivity {
                     switch (usrHelper.getPlant()){
                         case "ZUBB" : vw = "vw_wsum_p8";
                             break;
-                        case "SPN" : vw = "vw_wsum_p8";
+                        case "SPN" : vw = "vw_wsum_spn";
                             break;
                         case "SPS" : vw = "vw_wsum_sps";
                             break;

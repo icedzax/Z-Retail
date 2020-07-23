@@ -8,6 +8,22 @@
     tools:context="com.zubb.jannarongj.z_retail.QueueList"
     tools:showIn="@layout/activity_queue_list">
 
+    <EditText
+        android:id="@+id/hedt2"
+        android:layout_width="1dp"
+        android:layout_height="1dp"
+        android:layout_weight="1"
+        android:width="0dp"
+        android:height="0dp"
+        android:background="#00000000"
+        android:cursorVisible="false"
+        android:ems="10"
+        android:imeOptions="actionDone"
+
+        android:inputType="textPassword"
+        android:selectAllOnFocus="false"
+        android:textColor="@android:color/transparent" />
+
     <LinearLayout
         android:orientation="horizontal"
         android:layout_width="match_parent"

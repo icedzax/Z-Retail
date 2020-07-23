@@ -160,7 +160,7 @@ public class Login extends AppCompatActivity {
             pbbar.setVisibility(View.GONE);
             if (gPass.equals(id)){
                 usrHelper.createSession(username,id,plant,level);
-                Intent i = new Intent(Login.this, ListDo.class);
+                Intent i = new Intent(Login.this, QueueList.class);
                 startActivity(i);
                 finish();
             }else{

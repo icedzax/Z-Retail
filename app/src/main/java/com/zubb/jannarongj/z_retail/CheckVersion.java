@@ -46,8 +46,7 @@ public class CheckVersion extends AppCompatActivity {
         String ip = Formatter.formatIpAddress(wm.getConnectionInfo().getIpAddress());
 
 
-        //ip = "192.168.116.11";
-        if(ip.length()<8){
+        /*if(ip.length()<8){
             ip = "100";
         }else{
             ip = ip.substring(8,11);
@@ -63,7 +62,8 @@ public class CheckVersion extends AppCompatActivity {
         ip = "100";
     }
 
-}
+}*/
+        ip = "100";
 
 // Log.d("ip",ip);
 

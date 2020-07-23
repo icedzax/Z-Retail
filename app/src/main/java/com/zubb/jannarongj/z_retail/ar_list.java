@@ -8,6 +8,7 @@ import android.content.Intent;
 import android.graphics.Color;
 import android.os.AsyncTask;
 import android.os.Bundle;
+import android.support.design.widget.FloatingActionButton;
 import android.support.v7.app.AppCompatActivity;
 import android.text.Editable;
 import android.text.TextWatcher;
@@ -20,9 +21,14 @@ import android.view.WindowManager;
 import android.view.animation.AlphaAnimation;
 import android.view.animation.Animation;
 import android.view.inputmethod.InputMethodManager;
+import android.webkit.WebSettings;
+import android.webkit.WebView;
+import android.webkit.WebViewClient;
 import android.widget.AdapterView;
 import android.widget.Button;
 import android.widget.EditText;
+import android.widget.ExpandableListAdapter;
+import android.widget.ExpandableListView;
 import android.widget.LinearLayout;
 import android.widget.ListView;
 import android.widget.ProgressBar;
@@ -52,9 +58,15 @@ public class ar_list extends AppCompatActivity {
     String h_apr,h_aprby,h_kunnr,h_vbeln,h_carlicense,g_vbeln,h_matnr,h_arktx,h_documentid,h_lfimg,h_unit,h_divqty;
     String l = "";
     String rm ="";
-
+    Button btn_noship ,btn_u;
     List<Map<String, String>> vbelnlist  = new ArrayList<Map<String, String>>();
     List<Map<String, String>> picklist  = new ArrayList<Map<String, String>>();
+
+    List<String> expandableListTitle;
+    HashMap<String, List<String>> expandableListDetail;
+
+    ExpandableListView expandableListView;
+    ExpandableListAdapter expandableListAdapter;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -85,14 +97,37 @@ public class ar_list extends AppCompatActivity {
         pbbar = (ProgressBar) findViewById(R.id.pbbar);
         pbbar.setVisibility(View.GONE);
         list_vbeln = (ListView)findViewById(R.id.lvb);
+        btn_noship = (Button) findViewById(R.id.btn_noship);
+        btn_u = (Button) findViewById(R.id.btn_u);
         usrHelper = new UserHelper(this);
         connectionClass = new ConnectionClass();
         sLine = new Line();
+
+        expandableListView = (ExpandableListView) findViewById(R.id.expandableListView);
+
 
         // Toast.makeText(ar_list.this, g_vbeln.trim(), Toast.LENGTH_SHORT).show();
 
         VbelnFList fillList = new VbelnFList();
         fillList.execute(g_vbeln.trim());
+
+        btn_noship.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+              /*  LocationPicker locationPick = new LocationPicker(ar_list.this,usrHelper.getPlant());
+                locationPick.onOpenDialoag();*/
+                Intent i = new Intent(ar_list.this, NoShipActivity.class);
+                i.putExtra("seq", g_vbeln);
+                startActivity(i);
+            }
+        });
+
+        btn_u.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                onOpenWeb();
+            }
+        });
 
         closeBtn.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -122,11 +157,61 @@ public class ar_list extends AppCompatActivity {
             }
         });
 
+        if(usrHelper.getLevel().equals("10")){
+            btn_u.setVisibility(View.VISIBLE);
+        }
+
+        /*FloatingActionButton myFab = (FloatingActionButton) findViewById(R.id.floatingActionButton3);
+        myFab.setOnClickListener(new View.OnClickListener() {
+            public void onClick(View v) {
+
+                Intent i = new Intent(ar_list.this, NoShipActivity.class);
+                i.putExtra("seq", g_vbeln);
+                startActivity(i);
+            }
+        });*/
+
+    }
+
+    public void onOpenWeb(){
+        AlertDialog.Builder alert = new AlertDialog.Builder(ar_list.this);
+        alert.setTitle("ปลดล็อค");
+
+        WebView wv = new WebView(ar_list.this);
+
+        WebSettings ws = wv.getSettings();
+        ws.setJavaScriptEnabled(true);
+        ws.setAllowFileAccess(true);
+        String url = "http:\\192.168.116.222/ship/unlock.php?s="+g_vbeln+"&u="+usrHelper.getUserName();
+        if(usrHelper.getPlant().equals("SPN")){
+
+        }
+        wv.loadUrl("http:\\report.zubbsteel.com/ship/unlock.php?s="+g_vbeln+"&u="+usrHelper.getUserName());
+        wv.setWebViewClient(new WebViewClient() {
+            @Override
+            public boolean shouldOverrideUrlLoading(WebView view, String url) {
+                view.loadUrl(url);
+                return true;
+            }
+        });
+
+        alert.setView(wv);
+        alert.setNegativeButton("Close", new DialogInterface.OnClickListener() {
+            @Override
+            public void onClick(DialogInterface dialog, int id) {
+                dialog.dismiss();
+                VbelnFList fillList = new VbelnFList();
+                fillList.execute(g_vbeln.trim());
+            }
+        });
+        alert.show();
     }
 
     public class VbelnFList extends AsyncTask<String, String, String> {
 
         String z = "";
+
+        HashMap<String, List<String>> listTemp = new HashMap<String, List<String>>();
 
         @Override
         protected void onPreExecute() {
@@ -138,15 +223,96 @@ public class ar_list extends AppCompatActivity {
         @Override
         protected void onPostExecute(String r) {
 
-            kunnr.setText(g_vbeln);
+            kunnr.setText("คิวที่ "+g_vbeln);
             //vbeln.setText(h_vbeln);
             carlicense.setText(h_carlicense);
 
-            if(h_documentid==null || h_documentid.equals("")){
+            if(h_documentid==null){
                 h_documentid = "";
             }
 
-            String[] from = {"posnr","arktx"};
+            expandableListDetail = listTemp;
+            expandableListTitle = new ArrayList<String>(expandableListDetail.keySet());
+            expandableListAdapter = new CustomExpandableListAdapter(ar_list.this, expandableListTitle, expandableListDetail);
+            expandableListView.setAdapter(expandableListAdapter);
+
+            int c = expandableListAdapter.getGroupCount();
+            for (int i = 0 ; i<c;i++){
+                expandableListView.expandGroup(i);
+            }
+
+
+
+            /*expandableListView.setOnGroupExpandListener(new ExpandableListView.OnGroupExpandListener() {
+
+                @Override
+                public void onGroupExpand(int groupPosition) {
+                    Toast.makeText(getApplicationContext(),
+                            expandableListTitle.get(groupPosition) + " List Expanded.",
+                            Toast.LENGTH_SHORT).show();
+                }
+            });
+
+            expandableListView.setOnGroupCollapseListener(new ExpandableListView.OnGroupCollapseListener() {
+
+                @Override
+                public void onGroupCollapse(int groupPosition) {
+                    Toast.makeText(getApplicationContext(),
+                            expandableListTitle.get(groupPosition) + " List Collapsed.",
+                            Toast.LENGTH_SHORT).show();
+
+                }
+            });*/
+
+            expandableListView.setOnChildClickListener(new ExpandableListView.OnChildClickListener() {
+                @Override
+                public boolean onChildClick(ExpandableListView parent, View v,
+                                            int groupPosition, int childPosition, long id) {
+
+                    String item = expandableListDetail.get(expandableListTitle.get(groupPosition)).get(childPosition);
+                    item = item.substring(0,item.indexOf("-"));
+
+
+
+                    Intent i = new Intent(ar_list.this, AddProducts.class);
+                    i.putExtra("posnr", item);
+                    i.putExtra("vbeln", expandableListTitle.get(groupPosition));
+                    startActivity(i);
+
+                    return false;
+                }
+            });
+
+
+
+            /*if(usrHelper.getLevel().equals("10")){
+
+            expandableListView.setOnChildClickListener(new ExpandableListView.OnChildClickListener() {
+                @Override
+                public boolean onChildClick(ExpandableListView parent, View v,
+                                            int groupPosition, int childPosition, long id) {
+
+                    String item = expandableListDetail.get(expandableListTitle.get(groupPosition)).get(childPosition);
+                    item = item.substring(0,item.indexOf("-"));
+                    *//*Toast.makeText(
+                            getApplicationContext(),
+                            expandableListTitle.get(groupPosition)
+                                    + " -> "
+                                    + item, Toast.LENGTH_SHORT
+                    ).show();*//*
+
+                    Intent i = new Intent(ar_list.this, AddProducts.class);
+                    i.putExtra("posnr", item);
+                    i.putExtra("vbeln", expandableListTitle.get(groupPosition));
+                    startActivity(i);
+
+                    return false;
+                }
+            });
+
+            }*/
+
+            /*String[] from = {"posnr","arktx"};
             int[] views = {R.id.lposnr,R.id.larktx};
             final SimpleAdapter ADA = new SimpleAdapter(ar_list.this,
                     vbelnlist, R.layout.adp_new_do_list, from,
@@ -202,7 +368,7 @@ public class ar_list extends AppCompatActivity {
                     }
                 });
             }else{
-                /*list_vbeln.setOnItemLongClickListener(new AdapterView.OnItemLongClickListener() {
+                *//*list_vbeln.setOnItemLongClickListener(new AdapterView.OnItemLongClickListener() {
                     @Override
                     public boolean onItemLongClick(AdapterView<?> arg0, View arg1,
                                                    int arg2, long arg3) {
@@ -215,8 +381,8 @@ public class ar_list extends AppCompatActivity {
                         closeDo(h_vbeln,qposnr,qarktx);
                         return true;
                     }
-                });*/
-            }
+                });*//*
+            }*/
             //  Log.d("p8",z);
 
             checkComplete(h_apr);
@@ -224,6 +390,7 @@ public class ar_list extends AppCompatActivity {
             pbbar.setVisibility(View.GONE);
 
         }
+
 
         @Override
         protected String doInBackground(String... params) {
@@ -237,7 +404,7 @@ public class ar_list extends AppCompatActivity {
                     switch (usrHelper.getPlant()){
                         case "ZUBB" : vw = "vw_wsum_p8";
                             break;
-                        case "SPN" : vw = "vw_wsum_p8";
+                        case "SPN" : vw = "vw_wsum_spn";
                             break;
                         case "SPS" : vw = "vw_wsum_sps";
                             break;
@@ -248,13 +415,32 @@ public class ar_list extends AppCompatActivity {
                         default: vw ="vw_wsum_p8";
                     }
 
-                    String query = " SELECT * FROM "+vw+" where po_num = '"+params[0].trim()+"' ";
 
-                    PreparedStatement ps = con.prepareStatement(query);
-                    ResultSet rs = ps.executeQuery();
-                    Log.d("query",query);
+                    String qvb = " SELECT vbeln FROM "+vw+" where po_num = '"+params[0].trim()+"' group by vbeln ";
+                    PreparedStatement vps = con.prepareStatement(qvb);
+                    ResultSet vrs = vps.executeQuery();
 
-                    vbelnlist.clear();
+
+                    while (vrs.next()) {
+
+                        List<String> fetch_list = new ArrayList<String>();
+
+                        String query = " SELECT * FROM "+vw+" where vbeln = '"+vrs.getString("vbeln")+"' and matnr is not null ";
+                        PreparedStatement ps = con.prepareStatement(query);
+                        ResultSet rs = ps.executeQuery();
+
+                        while (rs.next()) {
+                            fetch_list.add(rs.getString("posnr") + "-" + rs.getString("arktx")+rs.getString("sscan"));
+
+                        }
+                        listTemp.put(vrs.getString("vbeln"),fetch_list);
+
+
+
+                    }
+
+
+                    /*vbelnlist.clear();
                     while (rs.next()) {
 
                         Map<String, String> datanums = new HashMap<String, String>();
@@ -280,25 +466,25 @@ public class ar_list extends AppCompatActivity {
 
                         h_documentid = rs.getString("DocumentId");
 
-                    }
+                    }*/
+
                     if(h_divqty==null || h_divqty.equals("") || h_divqty.equals("null")){
                         h_divqty = "0" ;
                     }
 
-                    String qapr = "SELECT top 1 ApproveOn ,ApproveBy from tbl_shipmentplan where vbeln = '"+h_vbeln+"'  order by 1 asc " ;
+                    String qapr = "SELECT top 1 ApproveOn ,ApproveBy from tbl_shipmentplan where po_num = '"+g_vbeln+"'  order by 2 asc  " ;
                     PreparedStatement aps = con.prepareStatement(qapr);
                     ResultSet ars = aps.executeQuery();
 
                     while (ars.next()) {
                         h_apr = ars.getString("ApproveOn");
                         h_aprby = ars.getString("ApproveBy");
+
                         //sumweight = qrs.getInt("sw");
                     }
 
-
-
-                    // z = "Success";
-                    z = query ;
+                     z = "Success";
+                    //z = query ;
 
                 }
             } catch (Exception ex) {
@@ -385,7 +571,6 @@ public class ar_list extends AppCompatActivity {
         qdialog.setCancelable(true);
         final TextView q_arktx,q_vbeln,q_lfimg;
 
-
         q_arktx = (TextView)qdialog.findViewById(R.id.q_arktx);
         q_vbeln = (TextView)qdialog.findViewById(R.id.q_vbeln);
         q_lock = (TextView)qdialog.findViewById(R.id.q_lock);
@@ -396,7 +581,7 @@ public class ar_list extends AppCompatActivity {
 
         q_lfimg.setText(qlfimg);
         q_arktx.setText(qarktx);
-        q_vbeln.setText(h_vbeln);
+        q_vbeln.setText(g_vbeln);
         String premark = "";
         String plock = "";
 
@@ -407,8 +592,6 @@ public class ar_list extends AppCompatActivity {
             premark = qlock;
             plock ="ปลดล็อค";
         }
-
-
 
         checkRemark();
         q_remark.setText(premark);
@@ -500,11 +683,11 @@ public class ar_list extends AppCompatActivity {
                     z = "Error in connection with SQL server";
                 } else {
 
-                    String query = "update tbl_shipmentplan  set ApproveOn  = CURRENT_TIMESTAMP , ApproveBy = '"+usrHelper.getUserName()+"' WHERE vbeln = '"+h_vbeln+"' and ApproveBy is null and ApproveOn is null";
+                    String query = "update tbl_shipmentplan  set ApproveOn  = CURRENT_TIMESTAMP , ApproveBy = '"+usrHelper.getUserName()+"' WHERE po_num = '"+g_vbeln+"' and ApproveBy is null and ApproveOn is null";
                     PreparedStatement preparedStatement = con.prepareStatement(query);
                     preparedStatement.executeUpdate();
 
-                    String qcarvis = "update tbl_shipment_carvisit  set OutTime  = CURRENT_TIMESTAMP WHERE seq in (select distinct(PO_NUM) from tbl_shipmentplan where vbeln = '"+h_vbeln+"' )";
+                    String qcarvis = "update tbl_shipment_carvisit  set OutTime  = CURRENT_TIMESTAMP WHERE seq = '"+g_vbeln+"' )";
                     PreparedStatement pStmcvsi = con.prepareStatement(qcarvis);
                     pStmcvsi.executeUpdate();
 
@@ -524,7 +707,7 @@ public class ar_list extends AppCompatActivity {
 
 
     public class UpdateLockDo extends AsyncTask<String, String, String> {
-
+    // TODO change un lock apr , qty
         String z = "";
         String uremark ="";
         Boolean isSuccess = false;
@@ -542,7 +725,7 @@ public class ar_list extends AppCompatActivity {
 
             if(isSuccess==true){
                 //if(uremark.equals("ตาชั่งมีปัญหา") || uremark.equals("ระบบชั่งมีปัญหา"))
-                sLine.PushMessage(usrHelper.getUserName(),h_vbeln,h_carlicense,h_kunnr,h_arktx,uremark);
+                sLine.PushMessage(usrHelper.getUserName(),g_vbeln,h_carlicense,h_kunnr,h_arktx,uremark);
             }
 
             VbelnFList fillList = new VbelnFList();

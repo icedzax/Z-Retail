@@ -343,7 +343,7 @@ public class ListDo extends AppCompatActivity {
                     switch (params[2]){
                         case "ZUBB" : plant = " and s.werks in ('1010','9010') "; vw = "gr_shipmentplan3";
                             break;
-                        case "SPN" : plant = " and s.werks in ('1050','9050') "; vw = "gr_shipmentplan3";
+                        case "SPN" : plant = " and s.werks in ('1050','9050') "; vw = "gr_shipmentplan3_spn";
                             break;
                         case "SPS" : plant = " and s.werks in ('1040','9040') "; vw = "gr_shipmentplan_sps";
                             break;

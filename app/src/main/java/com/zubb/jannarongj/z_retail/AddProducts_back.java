@@ -8,16 +8,13 @@ import android.content.Intent;
 import android.graphics.Color;
 import android.os.AsyncTask;
 import android.os.Bundle;
-import android.support.annotation.Nullable;
 import android.support.v7.app.AppCompatActivity;
 import android.text.Editable;
 import android.text.SpannableString;
 import android.text.Spanned;
 import android.text.TextWatcher;
 import android.text.style.ForegroundColorSpan;
-import android.util.Log;
 import android.view.KeyEvent;
-import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.Window;
@@ -48,7 +45,7 @@ import java.util.Map;
 
 import me.dm7.barcodescanner.zxing.ZXingScannerView;
 
-public class AddProducts extends AppCompatActivity {
+public class AddProducts_back extends AppCompatActivity {
 
     final Context context = this;
     ConnectionClass connectionClass;
@@ -226,7 +223,6 @@ public class AddProducts extends AppCompatActivity {
             btn_pick.setVisibility(View.GONE);
         }
 
-
         userPlant = usrHelper.getPlant();
         FillList fillList = new FillList();
         fillList.execute(g_vbeln.trim(),g_posnr.trim());
@@ -249,7 +245,7 @@ public class AddProducts extends AppCompatActivity {
         switch (usrHelper.getPlant()){
             case "ZUBB" : vw = "vw_wsum_p8";
                 break;
-            case "SPN" : vw = "vw_wsum_spn";
+            case "SPN" : vw = "vw_wsum_p8";
                 break;
             case "SPS" : vw = "vw_wsum_sps";
                 break;
@@ -316,7 +312,7 @@ public class AddProducts extends AppCompatActivity {
                 } else {
 
                     AlertDialog.Builder builder =
-                            new AlertDialog.Builder(AddProducts.this);
+                            new AlertDialog.Builder(AddProducts_back.this);
                     builder.setTitle("ปิดจบ");
                     builder.setMessage("ยืนยันการปิดจบ ?");
                     builder.setPositiveButton("ตกลง", new DialogInterface.OnClickListener() {
@@ -345,13 +341,14 @@ public class AddProducts extends AppCompatActivity {
             public void onClick(View v) {
 
 
+
                 if (getErCar()!=0) {
                     onErrorDialog(0,getErCar(),0,0,0,0,getErApp());
                 } else {
 
                     if (tab_hn == null) {
                         AlertDialog.Builder builder =
-                                new AlertDialog.Builder(AddProducts.this);
+                                new AlertDialog.Builder(AddProducts_back.this);
                         builder.setMessage("กรุณาเลือกรายการที่จะลบ");
                         builder.setPositiveButton("ตกลง", new DialogInterface.OnClickListener() {
                             public void onClick(DialogInterface dialog, int id) {
@@ -363,7 +360,7 @@ public class AddProducts extends AppCompatActivity {
 
                     } else {
                         AlertDialog.Builder builder =
-                                new AlertDialog.Builder(AddProducts.this);
+                                new AlertDialog.Builder(AddProducts_back.this);
                         builder.setMessage("ลบรายการ " + tab_hn + " หรือไม่ ?");
                         builder.setPositiveButton("ตกลง", new DialogInterface.OnClickListener() {
                             public void onClick(DialogInterface dialog, int id) {
@@ -408,7 +405,7 @@ public class AddProducts extends AppCompatActivity {
 
     private void qrCam(){
 
-        zXingScannerView = new ZXingScannerView(AddProducts.this);
+        zXingScannerView = new ZXingScannerView(AddProducts_back.this);
         setContentView(zXingScannerView);
         zXingScannerView.startCamera();
         zXingScannerView.setResultHandler(new ZXingScannerView.ResultHandler() {
@@ -418,6 +415,7 @@ public class AddProducts extends AppCompatActivity {
                 zXingScannerView.stopCamera();
                 zXingScannerView.removeAllViews();
                 setContentView(R.layout.activity_add_products);
+
 
                 //String resultString = result.getText().toString();
 
@@ -435,7 +433,7 @@ public class AddProducts extends AppCompatActivity {
     }
 
     private void getOpenSecondActivity() {
-        Intent intent = new Intent(AddProducts.this, QrCam.class);
+        Intent intent = new Intent(AddProducts_back.this, QrCam.class);
         startActivityForResult(intent, REQUEST_MAIN);
     }
 
@@ -527,7 +525,7 @@ public class AddProducts extends AppCompatActivity {
 
             if(isSuccess==true) {
                 if(split_flag==false){
-                    Toast.makeText(AddProducts.this, z, Toast.LENGTH_SHORT).show();
+                    Toast.makeText(AddProducts_back.this, z, Toast.LENGTH_SHORT).show();
                 }else{
                     if(isRetail==true){
                         splitInsert(scanresult, 1,true); //todo retail
@@ -759,10 +757,10 @@ public class AddProducts extends AppCompatActivity {
                                 String hmat = h_matnr.trim();
                                 String smat = matcode.trim();
 
-                              /*  int mm = 3;
+                                int mm = 3;
                                 if (hmat.substring(0, 3).equals("RBF") || hmat.substring(0, 3).equals("RBM") || hmat.substring(0, 3).equals("DBM") || hmat.substring(0, 3).equals("DBF")) {
                                     mm = 2;
-                                }*/
+                                }
 
                                 /*
                                 if(transfer==true){
@@ -775,13 +773,17 @@ public class AddProducts extends AppCompatActivity {
                                     }
                                 }
 */
-                                /*sm = smat.substring(0, mm) + "" + smat.substring(tr, smat.length());
-                                hm = hmat.substring(0, mm) + "" + hmat.substring(tr, hmat.length());*/
+                                sm = smat.substring(0, mm) + "" + smat.substring(tr, smat.length());
+                                hm = hmat.substring(0, mm) + "" + hmat.substring(tr, hmat.length());
 
-                                //if (hm.equals(sm)) {  // FOLD != M
-                                if (hmat.equals(smat)) {
+                                if (hm.equals(sm)) {
+
                                     setErMm(0);
                                 } else {
+
+                                if(rmd_qa_grade.trim().equals("QI")){
+                                    setErQi(1);
+                                }
 
                                     if(h_shippoint==null){
                                         h_shippoint = "";
@@ -825,7 +827,6 @@ public class AddProducts extends AppCompatActivity {
                                                 setErMm(1);
                                             }
                                         }
-
                                     }else{
                                        if (matcode.trim().equals(h_matnr.trim())){
                                            setErMm(0);
@@ -835,17 +836,9 @@ public class AddProducts extends AppCompatActivity {
 
                                     }
 
-                                    //if(h_shippoint.equals("1012") || h_shippoint.equals("1011")){
-                                        if(isOTC(matcode,h_matnr) == true){
-                                            setErMm(0);
-                                        }
-                                   // }
 
-                                    if(rmd_qa_grade.trim().equals("QI")){
-                                        setErQi(1);
-                                    }
+
                                 }
-
 
                             }
                             // Log.d("XX-hm",hm+""+tr);
@@ -906,46 +899,6 @@ public class AddProducts extends AppCompatActivity {
         }
     }
 
-
-     Boolean isOTC(String mat,String hmat){
-
-         Boolean rs = false;
-         String p = "O";
-         String m , h ;
-         int lmat = mat.length();
-         int lhat = hmat.length();
-         int l = 0 ;
-
-         if(mat.substring(lmat-1).equals("M") || hmat.substring(lhat-1).equals("M")){
-
-             l = lmat ;
-             if(lmat > lhat){
-                 l = lhat;
-             }
-
-             String h2 = hmat.substring(0,2);
-
-             if(h2.equals("DB") || h2.equals("RB")){
-                 m = mat.substring(0,2)+mat.substring(3,l);
-                 h = hmat.substring(0,2)+hmat.substring(3,l);
-             }
-             else{
-                 m = mat.substring(0,l);
-                 h = hmat.substring(0,l);
-             }
-
-             if(m.equals(h)){
-                 rs = true;
-             }else{
-                 rs = false;
-             }
-
-         }
-
-         return rs ;
-
-    }
-
     public class SplitScan extends AsyncTask<String, String, String> {
 
         String z = "";
@@ -966,7 +919,7 @@ public class AddProducts extends AppCompatActivity {
                 fillList.execute(g_vbeln.trim(),g_posnr.trim());
 
 
-                Toast.makeText(AddProducts.this, z, Toast.LENGTH_SHORT).show();
+                Toast.makeText(AddProducts_back.this, z, Toast.LENGTH_SHORT).show();
             }else{
                 onErrorDialog(getErDup(),getErCar(),getErNf(),getErMm(),getErNm(),getErQi(),getErApp());
 
@@ -1237,7 +1190,7 @@ public class AddProducts extends AppCompatActivity {
 
             String[] from = {"ids","charge","qty","rmd_weight","rmd_qa_grade","rmd_remark" };
             final int[] views = {R.id.id,R.id.charge,R.id.qty,R.id.weight,R.id.qa_grade,R.id.remark};
-            final SimpleAdapter ADA = new SimpleAdapter(AddProducts.this,
+            final SimpleAdapter ADA = new SimpleAdapter(AddProducts_back.this,
                     itemlist, R.layout.adp_listscan, from,
                     views) {
                 @Override
@@ -1287,9 +1240,6 @@ public class AddProducts extends AppCompatActivity {
                         double qweight = Integer.parseInt((String) obj.get("rmd_weight"));
 
                         tab_id = (String) obj.get("id");
-
-                        tab_hn = (String) obj.get("charge");
-                        tab_bun = (String) obj.get("bundle");
 
                         arg1.setSelected(true);
 
@@ -1353,15 +1303,15 @@ public class AddProducts extends AppCompatActivity {
                         h_unit = hrs.getString("unit");
                         h_rs = hrs.getInt("rs");
                         h_ntgew = hrs.getInt("NTGEWx");
-                        h_adjweight = hrs.getInt("stdweight");
+
 
 
                     }
 
-                   /* h_adjweight = h_ntgew ;
+                    h_adjweight = h_ntgew ;
                     if(h_ntgew >= 1000){
                         h_adjweight =   h_ntgew/h_limit;
-                    }*/
+                    }
 
                     String itemquery = "SELECT item_id,charge,bundle,qty,weight,qa_grade,remark from tbl_shipment_item " + where+ " order by add_stamp desc ";
                     PreparedStatement itemq = con.prepareStatement(itemquery);
@@ -1507,7 +1457,7 @@ public class AddProducts extends AppCompatActivity {
 
     public void ManaulDialog() {
 
-        final Dialog mdialog = new Dialog(AddProducts.this);
+        final Dialog mdialog = new Dialog(AddProducts_back.this);
         mdialog.requestWindowFeature(Window.FEATURE_NO_TITLE);
         mdialog.setContentView(R.layout.dialog_manaul);
         mdialog.setCancelable(true);
@@ -1548,7 +1498,7 @@ public class AddProducts extends AppCompatActivity {
 
     public void stockPick(String pickmat, String pickplant){
 
-        final Dialog pickdialog = new Dialog(AddProducts.this);
+        final Dialog pickdialog = new Dialog(AddProducts_back.this);
         pickdialog.requestWindowFeature(Window.FEATURE_NO_TITLE);
         pickdialog.setContentView(R.layout.dialog_stockpick);
 
@@ -1565,7 +1515,7 @@ public class AddProducts extends AppCompatActivity {
 
         String[] from = {"LGORT","CHARG","qty"};
         int[] views = {R.id.stock_loc,R.id.stock_batch ,R.id.stock_qty  };
-        final SimpleAdapter AdapVbeln = new SimpleAdapter(AddProducts.this,
+        final SimpleAdapter AdapVbeln = new SimpleAdapter(AddProducts_back.this,
                 stocklist, R.layout.adp_list_stock, from,
                 views){
             @Override
@@ -1619,7 +1569,7 @@ public class AddProducts extends AppCompatActivity {
 
     public void adjQty(String hn,final int qty,final Double weight){
 
-        final Dialog adjdialog = new Dialog(AddProducts.this);
+        final Dialog adjdialog = new Dialog(AddProducts_back.this);
         adjdialog.requestWindowFeature(Window.FEATURE_NO_TITLE);
         adjdialog.setContentView(R.layout.dialog_adjust);
 
@@ -1695,7 +1645,7 @@ public class AddProducts extends AppCompatActivity {
     public void splitInsert(String hn, int qty, final Boolean retail){
 
 
-        final Dialog spltdialog = new Dialog(AddProducts.this);
+        final Dialog spltdialog = new Dialog(AddProducts_back.this);
         spltdialog.requestWindowFeature(Window.FEATURE_NO_TITLE);
         spltdialog.setContentView(R.layout.dialog_split);
 
@@ -1781,7 +1731,7 @@ public class AddProducts extends AppCompatActivity {
         protected void onPostExecute(String r) {
             pbbar.setVisibility(View.GONE);
 
-            Toast.makeText(AddProducts.this, r, Toast.LENGTH_SHORT).show();
+            Toast.makeText(AddProducts_back.this, r, Toast.LENGTH_SHORT).show();
 
             FillList fillList = new FillList();
             fillList.execute(g_vbeln.trim(),g_posnr.trim());
@@ -1841,7 +1791,7 @@ public class AddProducts extends AppCompatActivity {
         @Override
         protected void onPostExecute(String r) {
             pbbar.setVisibility(View.GONE);
-            Toast.makeText(AddProducts.this, r, Toast.LENGTH_SHORT).show();
+            Toast.makeText(AddProducts_back.this, r, Toast.LENGTH_SHORT).show();
             if(isSuccess==true) {
                 FillList fillList = new FillList();
                 fillList.execute(g_vbeln.trim(),g_posnr.trim());
@@ -1886,7 +1836,7 @@ public class AddProducts extends AppCompatActivity {
         @Override
         protected void onPostExecute(String r) {
             pbbar.setVisibility(View.GONE);
-            Toast.makeText(AddProducts.this, r, Toast.LENGTH_SHORT).show();
+            Toast.makeText(AddProducts_back.this, r, Toast.LENGTH_SHORT).show();
             // Toast.makeText(AddProducts.this, "HAPR : "+h_apr, Toast.LENGTH_SHORT).show();
             if(isSuccess==true) {
 
@@ -1940,7 +1890,7 @@ public class AddProducts extends AppCompatActivity {
             if(isSuccess==true) {
                 FillList fillList = new FillList();
                 fillList.execute(g_vbeln.trim(),g_posnr.trim());
-                Toast.makeText(AddProducts.this, r, Toast.LENGTH_SHORT).show();
+                Toast.makeText(AddProducts_back.this, r, Toast.LENGTH_SHORT).show();
             }else{
                 onErrorDialog(getErDup(),getErCar(),getErNf(),getErMm(),getErNm(),getErQi(),getErApp());
             }
@@ -2073,7 +2023,7 @@ public class AddProducts extends AppCompatActivity {
         protected void onPostExecute(String r) {
             pbbar.setVisibility(View.GONE);
 
-            Toast.makeText(AddProducts.this, r, Toast.LENGTH_SHORT).show();
+            Toast.makeText(AddProducts_back.this, r, Toast.LENGTH_SHORT).show();
 
             FillList fillList = new FillList();
             fillList.execute(g_vbeln.trim(),g_posnr.trim());

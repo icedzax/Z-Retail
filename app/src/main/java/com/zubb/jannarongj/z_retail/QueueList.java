@@ -1,23 +1,29 @@
 package com.zubb.jannarongj.z_retail;
 
+import android.app.Dialog;
 import android.content.Intent;
 import android.graphics.Color;
 import android.os.AsyncTask;
 import android.os.Bundle;
 
+import android.support.design.widget.FloatingActionButton;
 import android.support.v7.app.AppCompatActivity;
 import android.text.Editable;
 import android.text.TextWatcher;
 import android.util.Log;
+import android.view.KeyEvent;
 import android.view.View;
 import android.view.ViewGroup;
+import android.view.Window;
 import android.view.WindowManager;
+import android.view.inputmethod.EditorInfo;
 import android.widget.AdapterView;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ListView;
 import android.widget.ProgressBar;
 import android.widget.SimpleAdapter;
+import android.widget.TextView;
 import android.widget.Toast;
 import android.widget.ToggleButton;
 
@@ -37,8 +43,9 @@ public class QueueList extends AppCompatActivity {
     ToggleButton tgg1, tgg2, tgg3, tgg4,tggP8;
     ProgressBar pbbar;
     ListView lstdo;
-    EditText searchBox;
+    EditText searchBox,hideEdt;
     String plant;
+    String scanresult = "";
 
     public String getShipp1() {
         return shipp1;
@@ -88,6 +95,7 @@ public class QueueList extends AppCompatActivity {
         lstdo = (ListView) findViewById(R.id.lstdo);
         btnSearch = (Button) findViewById(R.id.btnSearch);
         completeDo = (Button)findViewById(R.id.allcbtn);
+        hideEdt= (EditText) findViewById(R.id.hedt2);
         tggP8 = (ToggleButton) findViewById(R.id.toggleP8);
         tgg1 = (ToggleButton) findViewById(R.id.tgg1);
         tgg2 = (ToggleButton) findViewById(R.id.tgg2);
@@ -179,6 +187,8 @@ public class QueueList extends AppCompatActivity {
             }
         });
 
+
+
         tgg1.setOnClickListener(new View.OnClickListener() {
 
             @Override
@@ -260,6 +270,61 @@ public class QueueList extends AppCompatActivity {
             }
         });
 
+        //hideEdt.requestFocus();
+        hideEdt.setOnEditorActionListener(new TextView.OnEditorActionListener() {
+            String demo ="";
+            public boolean onEditorAction(TextView v, int actionId, KeyEvent event) {
+
+                if((event != null && (event.getKeyCode() == KeyEvent.KEYCODE_ENTER)) || (actionId == EditorInfo.IME_ACTION_DONE)) {
+                    if(hideEdt.getText().toString().trim().contains("DEMO")){
+                        demo = hideEdt.getText().toString().trim().replace("DEMO","").replace("*","").replaceAll("\r", "").replaceAll("\n", "").replaceAll("\t", "").trim();
+
+                    }else{
+                        demo = hideEdt.getText().toString().trim().replace("*","").replaceAll("\r", "").replaceAll("\n", "").replaceAll("\t", "").trim();
+                    }
+                    insertSCAN(demo);
+                }
+
+                return false;
+            }
+
+        });
+
+    }
+
+    @Override
+    public boolean dispatchKeyEvent(KeyEvent KEvent)
+    {
+        int keyaction = KEvent.getAction();
+
+        if(keyaction == KeyEvent.ACTION_DOWN)
+        {
+            int keycode = KEvent.getKeyCode();
+
+            if(keycode == 120){
+                //qrCam();
+
+                hideEdt.requestFocus();
+
+            }
+
+        }
+        return super.dispatchKeyEvent(KEvent);
+    }
+    public void insertSCAN(String rsscan){
+
+        if(rsscan.length()>0){
+            this.scanresult = rsscan;
+
+            getQueue gq = new getQueue();
+            gq.execute(rsscan);
+
+            this.hideEdt.setText("");
+
+        }else{
+            this.hideEdt.setText("");
+        }
+        this.hideEdt.setText("");
     }
 
     public class FillList extends AsyncTask<String, String, String> {
@@ -338,7 +403,6 @@ public class QueueList extends AppCompatActivity {
                     String plant = "";
                     String vw = "";
 
-
                     switch (params[2]){
                         case "ZUBB" : plant = " and s.werks in ('1010','9010') "; vw = "gr_shipmentplan3";
                             break;
@@ -370,20 +434,24 @@ public class QueueList extends AppCompatActivity {
                             break;
 
                     }
+                    String w = "";
+                    String ponum = " right(s.PO_NUM,3) ";
+                    if(usrHelper.getPlant().equals("ZUBB") || usrHelper.getPlant().equals("RS")){
+                        ponum = "case when s.ship_point = '1012' then 'P1'+'-'+right(s.PO_NUM,3) " +
+                                "     when s.ship_point = '1011' then 'P8'+'-'+right(s.PO_NUM,3) else s.ship_point+'-'+right(s.PO_NUM,3) end " ;
+                        w = " s.ship_point is not null and ";
+                    }
 
                     String query = "SELECT s.PO_NUM as SEQ,s.WADAT," +
-                            "case when s.ship_point = '1012' then 'P1'+'-'+right(s.PO_NUM,3) " +
-                            "     when s.ship_point = '1011' then 'P8'+'-'+right(s.PO_NUM,3) else s.ship_point+'-'+right(s.PO_NUM,3) end as PO_NUM ," +
+                            " "+ponum+" as PO_NUM ," +
                             "s.AR_NAME,s.CARLICENSE " +
                             "FROM "+vw+" as s LEFT JOIN dbo.tbl_shipment_item as i " +
                             "on i.VBELN = s.VBELN and i.POSNR = s.POSNR " +
-                            "where  s.ship_point is not null and s.wadat  > getdate()-1 and s.PO_NUM is not null and s.VBELN is not null and left(s.MATNR,2) not in ('BL','SC') " +plant+ where+ " " + vbeln +
-                            "group by s.PO_NUM,case when s.ship_point = '1012' then 'P1'+'-'+right(s.PO_NUM,3) " +
-                            " when s.ship_point = '1011' then 'P8'+'-'+right(s.PO_NUM,3) else s.ship_point+'-'+right(s.PO_NUM,3) end,s.AR_NAME,s.CARLICENSE,s.WADAT " +having+
+                            "where  "+w+" s.wadat  > getdate()-1 and s.PO_NUM is not null and s.VBELN is not null  " +plant+ where+ " " + vbeln +
+                            "group by s.PO_NUM, "+ponum+ " ,s.AR_NAME,s.CARLICENSE,s.WADAT " +having+
                             "order by 1 desc ";
 
-                    Log.d("query",query);
-
+                   //Log.d("query",query);
                     PreparedStatement ps = con.prepareStatement(query);
                     ResultSet rs = ps.executeQuery();
                     dolist.clear();
@@ -404,10 +472,139 @@ public class QueueList extends AppCompatActivity {
                 }
             } catch (Exception ex) {
                 z = ex.getMessage();//"Error retrieving data from table";
-
             }
             return z;
         }
     }
+
+
+
+    public class getQueue extends AsyncTask<String, String, String> {
+
+        String z = "";
+        String q = "";
+        Boolean isFound = false;
+
+        List<Map<String, String>> dolist = new ArrayList<Map<String, String>>();
+
+        @Override
+        protected void onPreExecute() {
+
+            pbbar.setVisibility(View.VISIBLE);
+        }
+
+        @Override
+        protected void onPostExecute(String r) {
+            //Log.d("Zs",z);
+            if(isFound==true){
+
+                Intent i = new Intent(QueueList.this, ar_list.class);
+                i.putExtra("vbeln", q);
+                startActivity(i);
+
+            }else{
+                alertErr(q);
+            }
+            pbbar.setVisibility(View.GONE);
+           // Toast.makeText(QueueList.this, r, Toast.LENGTH_SHORT).show();
+            // Toast.makeText(ListDo.this, "getfil : "+getFilter()+"\ngetvbeln : "+getFilvbeln(), Toast.LENGTH_SHORT).show();
+
+
+        }
+
+        @Override
+        protected String doInBackground(String... params) {
+
+            try {
+
+                Connection con = connectionClass.CONN();
+                if (con == null) {
+                    z = "Error in connection with SQL server";
+                } else {
+
+                    String where = "";
+                    String having = "";
+                    String vbeln = "";
+                    String plant = "";
+                    String vw = "";
+
+
+                    switch (usrHelper.getPlant()){
+                        case "ZUBB" : plant = " and werks in ('1010','9010') "; vw = "gr_shipmentplan3";
+                            break;
+                        case "SPN" : plant = " and werks in ('1050','9050') "; vw = "gr_shipmentplan3";
+                            break;
+                        case "SPS" : plant = " and werks in ('1040','9040') "; vw = "gr_shipmentplan_sps";
+                            break;
+                        case "OPS" : plant = " and werks in ('2010','9060','1020','9020') "; vw = "gr_shipmentplan_ops";
+                            break;
+                        case "RS" : plant = " and werks in ('1010','9010') "; vw = "gr_shipmentplan3 ";
+                            break;
+                        default: vw ="gr_shipmentplan3";
+                    }
+
+                    String query = "SELECT isnull(PO_NUM,'') as po_num " +
+                            "from "+vw+" where po_num = '"+params[0]+"'  "+plant+"  and wadat > getdate()-1 ";
+
+                    //  Log.d("query",query);
+
+                    PreparedStatement ps = con.prepareStatement(query);
+                    ResultSet rs = ps.executeQuery();
+                   while (rs.next()){
+                       q = rs.getString("po_num");
+                   }
+
+                    if(q == null ||q.equals("")){
+                        isFound = false;
+                        q = params[0];
+                    }else{
+                        isFound = true;
+                    }
+
+                    z = "Success";
+                    //z = query;
+                }
+            } catch (Exception ex) {
+                z = ex.getMessage();//"Error retrieving data from table";
+            }
+            return z;
+        }
+    }
+
+    public void alertErr(String txt){
+
+        final Dialog dialogerr = new Dialog(QueueList.this);
+        dialogerr.requestWindowFeature(Window.FEATURE_NO_TITLE);
+        dialogerr.setContentView(R.layout.customdia_err);
+        dialogerr.setCancelable(true);
+
+        TextView tv_err;
+        Button btn_ok;
+        String msg = "";
+
+        tv_err = (TextView) dialogerr.findViewById(R.id.tv_err);
+        btn_ok = (Button) dialogerr.findViewById(R.id.btn_ok);
+
+            tv_err.setText("ไม่พบข้อมูล\n"+txt);
+
+
+
+        btn_ok.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                dialogerr.dismiss();
+
+            }
+        });
+        dialogerr.show();
+    }
+
+    public  void scanQ(String Q){
+
+      //      searchBox.setText();
+    }
+
+
+
 
 }

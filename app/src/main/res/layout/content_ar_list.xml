@@ -8,6 +8,21 @@
     tools:context="com.zubb.jannarongj.z_retail.ar_list"
     tools:showIn="@layout/activity_ar_list">
 
+
+    <!--<android.support.design.widget.FloatingActionButton
+        android:id="@+id/floatingActionButton3"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignParentBottom="true"
+        android:layout_alignParentEnd="true"
+        android:layout_alignParentRight="true"
+        android:layout_gravity="end|top"
+        android:layout_marginBottom="50dp"
+        android:layout_marginEnd="5dp"
+        android:clickable="true"
+        app:fabSize="mini"
+        app:srcCompat="?attr/actionModePasteDrawable" />-->
+
     <LinearLayout
         android:id="@+id/body"
         android:layout_width="match_parent"
@@ -20,7 +35,15 @@
             android:id="@+id/li1"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
+            android:background="#E8E8E8"
             android:orientation="horizontal">
+
+            <Button
+                android:id="@+id/btn_u"
+                android:layout_width="27dp"
+                android:layout_height="28dp"
+                android:background="@android:drawable/ic_lock_lock"
+                android:visibility="gone" />
 
             <TextView
                 android:id="@+id/seq"
@@ -28,10 +51,20 @@
                 android:layout_height="match_parent"
                 android:layout_weight="1"
                 android:background="#E8E8E8"
+                android:gravity="center"
                 android:padding="2dp"
                 android:textAlignment="center"
                 android:textColor="#000000"
                 android:textSize="23sp"
+                android:textStyle="bold" />
+
+            <Button
+                android:id="@+id/btn_noship"
+                style="@style/Widget.AppCompat.Button.Colored"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="no ship"
+                android:textSize="18sp"
                 android:textStyle="bold" />
 
             <TextView
@@ -44,7 +77,8 @@
                 android:textAlignment="center"
                 android:textColor="#000000"
                 android:textSize="20sp"
-                android:textStyle="bold" />
+                android:textStyle="bold"
+                android:visibility="gone" />
         </LinearLayout>
 
         <ListView
@@ -53,7 +87,21 @@
             android:layout_height="wrap_content"
             android:layout_above="@+id/lib"
             android:layout_below="@+id/li1"
+            android:visibility="gone"
             android:layout_weight="1" />
+
+        <ExpandableListView
+            android:id="@+id/expandableListView"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:layout_above="@+id/lib"
+            android:layout_below="@+id/li1"
+            android:layout_weight="1"
+            android:divider="@android:color/darker_gray"
+            android:dividerHeight="0.5dp"
+            android:indicatorLeft="?android:attr/expandableListPreferredItemIndicatorLeft" />
+
+
 
         <LinearLayout
             android:id="@+id/lib"

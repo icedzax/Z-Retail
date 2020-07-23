@@ -56,16 +56,16 @@ public class ConnectionClass {
         }else{
             password = "";
         }
-
+        password = "";
 
        // Log.d("ip",getIp()+"\n"+getPassword());
 
         try {
 
             Class.forName(classs);
-            ConnURL = "jdbc:jtds:sqlserver://192.168." +getIp()+ ".222;"
+            ConnURL = "jdbc:jtds:sqlserver://192.168.100.222;"
                     + "databaseName=" + db + ";user=" + un + ";password="
-                    + getPassword() + ";";
+                    +password+ ";";
             conn = DriverManager.getConnection(ConnURL);
         } catch (SQLException se) {
             Log.e("ERROR", se.getMessage());
