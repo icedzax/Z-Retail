@@ -470,7 +470,7 @@ public class AddProducts_back extends AppCompatActivity {
         {
             int keycode = KEvent.getKeyCode();
 
-            if(keycode == 120){
+            if(keycode == 120 || keycode == 520){
                 //qrCam();
 
                 hideEdt.requestFocus();

@@ -301,7 +301,7 @@ public class QueueList extends AppCompatActivity {
         {
             int keycode = KEvent.getKeyCode();
 
-            if(keycode == 120){
+            if(keycode == 120 || keycode == 520){
                 //qrCam();
 
                 hideEdt.requestFocus();
@@ -406,13 +406,15 @@ public class QueueList extends AppCompatActivity {
                     switch (params[2]){
                         case "ZUBB" : plant = " and s.werks in ('1010','9010') "; vw = "gr_shipmentplan3";
                             break;
-                        case "SPN" : plant = " and s.werks in ('1050','9050') "; vw = "gr_shipmentplan3";
+                        case "SPN" : plant = " and s.werks in ('1050','9050') "; vw = "gr_shipmentplan3_spn";
                             break;
                         case "SPS" : plant = " and s.werks in ('1040','9040') "; vw = "gr_shipmentplan_sps";
                             break;
                         case "OPS" : plant = " and s.werks in ('2010','9060','1020','9020') "; vw = "gr_shipmentplan_ops";
                             break;
                         case "RS" : plant = " and s.werks in ('1010','9010') "; vw = "gr_shipmentplan3 ";
+                            break;
+                        case "MMT" : plant = " and s.werks in ('3030','9030') "; vw = "vw_shipmentplan_mmt ";
                             break;
                         default: vw ="gr_shipmentplan3";
                     }
@@ -441,17 +443,20 @@ public class QueueList extends AppCompatActivity {
                                 "     when s.ship_point = '1011' then 'P8'+'-'+right(s.PO_NUM,3) else s.ship_point+'-'+right(s.PO_NUM,3) end " ;
                         w = " s.ship_point is not null and ";
                     }
-
+                    String checker = "";
+                    if(!usrHelper.getLevel().equals("10")){
+                        checker = "  ISNULL(emp_code,'0') IN ('"+usrHelper.getPassword()+"','0') and ";
+                    }
                     String query = "SELECT s.PO_NUM as SEQ,s.WADAT," +
                             " "+ponum+" as PO_NUM ," +
                             "s.AR_NAME,s.CARLICENSE " +
                             "FROM "+vw+" as s LEFT JOIN dbo.tbl_shipment_item as i " +
                             "on i.VBELN = s.VBELN and i.POSNR = s.POSNR " +
-                            "where  "+w+" s.wadat  > getdate()-1 and s.PO_NUM is not null and s.VBELN is not null  " +plant+ where+ " " + vbeln +
+                            "where  "+checker+" "+w+" s.wadat  > getdate()-1 and s.PO_NUM is not null and s.VBELN is not null  " +plant+ where+ " " + vbeln +
                             "group by s.PO_NUM, "+ponum+ " ,s.AR_NAME,s.CARLICENSE,s.WADAT " +having+
                             "order by 1 desc ";
 
-                   //Log.d("query",query);
+                   Log.d("query",query);
                     PreparedStatement ps = con.prepareStatement(query);
                     ResultSet rs = ps.executeQuery();
                     dolist.clear();
@@ -532,7 +537,7 @@ public class QueueList extends AppCompatActivity {
                     switch (usrHelper.getPlant()){
                         case "ZUBB" : plant = " and werks in ('1010','9010') "; vw = "gr_shipmentplan3";
                             break;
-                        case "SPN" : plant = " and werks in ('1050','9050') "; vw = "gr_shipmentplan3";
+                        case "SPN" : plant = " and werks in ('1050','9050') "; vw = "gr_shipmentplan3_spn";
                             break;
                         case "SPS" : plant = " and werks in ('1040','9040') "; vw = "gr_shipmentplan_sps";
                             break;
@@ -540,25 +545,45 @@ public class QueueList extends AppCompatActivity {
                             break;
                         case "RS" : plant = " and werks in ('1010','9010') "; vw = "gr_shipmentplan3 ";
                             break;
+                        case "MMT" : plant = ""; vw = "vw_shipmentplan_mmt ";
+                            break;
                         default: vw ="gr_shipmentplan3";
                     }
+//                    String q = "PO_NUM";
+                    String qv = "PO_NUM";
+                    if(usrHelper.getPlant().equals("MMT")){
+                        q = "queue_num";
+                    }
+                    String query = "SELECT distinct(isnull("+qv+",'')) as po_num " +
+                            "from "+vw+" where  "+qv+" = (select top 1 "+qv+" from tbl_shipmentplan where vbeln = '"+params[0]+"' and "+qv+" is not null order by ChangeOn desc )  "+plant+"  and wadat > getdate()-1 ";
 
-                    String query = "SELECT isnull(PO_NUM,'') as po_num " +
-                            "from "+vw+" where po_num = '"+params[0]+"'  "+plant+"  and wadat > getdate()-1 ";
-
-                    //  Log.d("query",query);
+                    //  Log.d("queryQ",query);
 
                     PreparedStatement ps = con.prepareStatement(query);
                     ResultSet rs = ps.executeQuery();
+
                    while (rs.next()){
                        q = rs.getString("po_num");
                    }
 
-                    if(q == null ||q.equals("")){
+                    if(q == null || q.equals("")){
+                        query = "SELECT distinct(isnull("+qv+",'')) as po_num " +
+                                "from "+vw+" where  "+qv+" = '"+params[0]+"' ";
+                        PreparedStatement ps2 = con.prepareStatement(query);
+                        ResultSet rs2 = ps2.executeQuery();
+                        while (rs2.next()){
+                            q = rs2.getString("po_num");
+                        }
+
+
+                    }
+
+
+                    if(q == null || q.equals("")){
                         isFound = false;
                         q = params[0];
                     }else{
-                        isFound = true;
+                         isFound = true;
                     }
 
                     z = "Success";

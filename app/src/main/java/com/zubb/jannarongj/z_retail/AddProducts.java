@@ -8,6 +8,7 @@ import android.content.Intent;
 import android.graphics.Color;
 import android.os.AsyncTask;
 import android.os.Bundle;
+import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.v7.app.AppCompatActivity;
 import android.text.Editable;
@@ -36,6 +37,8 @@ import android.widget.Toast;
 
 import com.google.zxing.Result;
 
+import org.jetbrains.annotations.NotNull;
+
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
@@ -56,14 +59,15 @@ public class AddProducts extends AppCompatActivity {
     ProgressBar pbbar;
     EditText hideEdt;
     ListView lvitem;
-    Button btn_del,btn_split,btn_pick,btn_complete;
+    Button btn_del,btn_split,btn_pick,btn_complete,btnALL;
     static Boolean split_flag = false;
     static Boolean transfer = false;
+    static Boolean isAll = false;
     private static final int REQUEST_MAIN = 11;
 
     TextView qweight,tv_up,txtw2,tv_splittxt,tv_limit,tv_rs,tv_w1,tv_w2,tv_documentid,tv_vbeln,tv_ar_name,tv_arktx,tv_wadat,tv_carlicense,tv_tagw,tv_sumw,tv_sumbun,tv_sumqty,tv_wdate1,tv_wdate2;
     String itxt,scanresult,h_unit,h_wdate1,h_wdate2,g_vbeln,g_posnr,h_vbeln,h_posnr,h_ar_name,h_arktx,h_wadat,h_carlicense,h_kunnr,h_matnr,tab_hn,tab_id,tab_bun,h_documentid;
-    String h_apr,h_aprby,h_wadatx;
+    String h_allowby,h_apr,h_aprby,h_wadatx;
     String user;
     String rmd_date;
     String ver;
@@ -76,6 +80,7 @@ public class AddProducts extends AppCompatActivity {
     String rmd_weight;
     String rmd_qa_grade;
     String rmd_remark;
+    String h_lock;
     String bar_id,dSize,dBar_id,dCharge,dBundle,dVbeln,dUser,dStamp,rfsponum,rfswerks;
     String hm,sm,userPlant,rfsdocid,rfscar;
     String vw,h_shippoint ,h_werks,h_shipp;
@@ -215,6 +220,9 @@ public class AddProducts extends AppCompatActivity {
         tv_up = (TextView)findViewById(R.id.tv_up);
         btn_pick = (Button)findViewById(R.id.btn_pick);
         btn_complete = (Button)findViewById(R.id.btn_complete);
+        btnALL = (Button)findViewById(R.id.btnALL);
+
+
 
         btn_complete.setVisibility(View.GONE);
         btn_del.setVisibility(View.GONE);
@@ -234,6 +242,7 @@ public class AddProducts extends AppCompatActivity {
         if(usrHelper.getPlant().equals("RS")){
             insertPlant = "ZUBB";
         }
+
 
         /*if(h_apr!=null || !"null".equals(h_apr)){
             alreadyApp(true);
@@ -257,10 +266,41 @@ public class AddProducts extends AppCompatActivity {
                 break;
             case "RS" : vw = "vw_wsum_p8";
                 break;
+            case "MMT" : vw = "vw_wsum_mmt";
+                break;
             default: vw ="vw_wsum_p8";
         }
 
 
+        btnALL.setOnClickListener(new View.OnClickListener() {
+
+            @Override
+            public void onClick(View v) {
+                AlertDialog.Builder builder =
+                        new AlertDialog.Builder(AddProducts.this);
+                builder.setMessage("ยืนยันเปลี่ยนเป็นขึ้นของแบบรวมเกรด");
+                builder.setPositiveButton("ตกลง", new DialogInterface.OnClickListener() {
+                    public void onClick(DialogInterface dialog, int id) {
+                        allMat am = new allMat();
+                        if(isAll==true){
+                            am.execute("");
+                        }else{
+                            am.execute("X");
+                        }
+
+                    }
+                });
+                builder.setNegativeButton("ยกเลิก", new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialog, int which) {
+                        //dialog.dismiss();
+
+                    }
+                });
+                builder.show();
+
+            }
+        });
 
         btn_split.setOnClickListener(new View.OnClickListener() {
 
@@ -472,7 +512,7 @@ public class AddProducts extends AppCompatActivity {
         {
             int keycode = KEvent.getKeyCode();
 
-            if(keycode == 120){
+            if(keycode == 120 || keycode == 520){
                 //qrCam();
 
                 hideEdt.requestFocus();
@@ -585,6 +625,7 @@ public class AddProducts extends AppCompatActivity {
                                 rfscar = rfst.getString("carlicense");
                                 rfsponum = rfst.getString("PO_NUM");
                                 rfswerks = rfst.getString("WERKS");
+
                             }
                             if(rfsdocid==null){
                                 rfsdocid="";
@@ -661,16 +702,15 @@ public class AddProducts extends AppCompatActivity {
 
 
 //                            String checkDup = "Select top 1 * from tbl_shipment_item where item_barcode = '" + params[0].trim() + "' and split_bundle = 0 and left(vbeln,1) <> '3'    order by add_stamp desc  ";
-                            String isTransf = " and left(vbeln,1) <> '3' ";
-                            if(h_vbeln.substring(0,1).equals("3")){
-                                isTransf = " and location = '"+doc_plant+"' ";
-                            }
+//                            String isTransf = " and left(vbeln,1) <> '3' ";
+//                            if(h_vbeln.substring(0,1).equals("3")){
+//                                isTransf = " and location = '"+doc_plant+"' ";
+//                            }
                             String checkDup = "select top 1 * from tbl_shipment_item \n" +
                                     "where charge ='"+rmd_charge+"' and bundle = "+r_bundle+" and split_bundle = 0  and mat_code = '"+matcode+"' and location = '"+doc_plant+"'  \n" +
                                     "order by add_stamp desc";
                             PreparedStatement cd = con.prepareStatement(checkDup);
                             ResultSet cdps = cd.executeQuery();
-
 
                             while (cdps.next()) {
                                 dBar_id = cdps.getString("item_barcode");
@@ -781,7 +821,14 @@ public class AddProducts extends AppCompatActivity {
                                 //if (hm.equals(sm)) {  // FOLD != M
                                 if (hmat.equals(smat)) {
                                     setErMm(0);
-                                } else {
+                                } else if (isAll){
+                                    if(h_matnr.trim().substring(0,3).equals(matcode.trim().substring(0,3))){
+                                        setErMm(0);
+                                    }else{
+                                        setErMm(1);
+                                    }
+
+                                }else {
 
                                     if(h_shippoint==null){
                                         h_shippoint = "";
@@ -815,7 +862,7 @@ public class AddProducts extends AppCompatActivity {
 //                                            if(ssmat.equals(h_matnr)){
 //                                                setErMm(0);
 //                                            }else{
-//                                                setErMm(1);
+//                                          +      setErMm(1);
 //                                            }
                                             setErMm(0);
                                         }else{
@@ -836,11 +883,13 @@ public class AddProducts extends AppCompatActivity {
                                     }
 
                                     //if(h_shippoint.equals("1012") || h_shippoint.equals("1011")){
-                                        if(isOTC(matcode,h_matnr) == true){
-                                            setErMm(0);
-                                        }
+
                                    // }
 
+                                 /*   if(isOTC(matcode,h_matnr) == true){
+                                        setErMm(0);
+                                    }
+*/
                                     if(rmd_qa_grade.trim().equals("QI")){
                                         setErQi(1);
                                     }
@@ -910,7 +959,7 @@ public class AddProducts extends AppCompatActivity {
      Boolean isOTC(String mat,String hmat){
 
          Boolean rs = false;
-         String p = "O";
+         //String p = "O";
          String m , h ;
          int lmat = mat.length();
          int lhat = hmat.length();
@@ -931,7 +980,7 @@ public class AddProducts extends AppCompatActivity {
              }
              else{
                  m = mat.substring(0,l);
-                 h = hmat.substring(0,l);
+                 h = hmat.substring(0,lhat);
              }
 
              if(m.equals(h)){
@@ -1157,6 +1206,8 @@ public class AddProducts extends AppCompatActivity {
                 alreadyApp(false);
             }
 
+
+
             String stext  = h_vbeln+"-"+h_posnr;
             String unit = "";
             int start = stext.trim().indexOf("-")+1;
@@ -1219,7 +1270,8 @@ public class AddProducts extends AppCompatActivity {
             }
 
             tv_vbeln.setText(svbeln);
-            tv_arktx.setText(h_arktx);
+//            tv_arktx.setText(h_arktx);
+            setAllMat(h_lock);
             tv_wadat.setText(h_wadat);
             tv_carlicense.setText(h_carlicense);
             tv_ar_name.setText(h_ar_name);
@@ -1325,7 +1377,7 @@ public class AddProducts extends AppCompatActivity {
                         where = "where vbeln = '" + params[0] + "' and posnr = '" + params[1] + "' ";
                     }
 
-                    String headqry = "select convert(nvarchar(20),cast(wadat as datetime),103) as wadat2 ,*,isnull(NTGEW,0) as NTGEWx ,round(wsum,0) as wsum2,round(asum,0) as asum2 from "+vw+" " + where ;
+                    String headqry = "select convert(nvarchar(20),cast(wadat as datetime),103) as wadat2 ,*,isnull(NTGEW,0) as NTGEWx ,round(wsum,0) as wsum2,round(asum,0) as asum2,LOCK from "+vw+" " + where ;
                     PreparedStatement hps = con.prepareStatement(headqry);
                     ResultSet hrs = hps.executeQuery();
 
@@ -1350,12 +1402,18 @@ public class AddProducts extends AppCompatActivity {
                         h_asum = hrs.getInt("asum2");
                         h_sqty = hrs.getInt("sqty");
                         h_limit = hrs.getInt("LFIMG");
+                        h_lock = hrs.getString("LOCK");
                         h_unit = hrs.getString("unit");
                         h_rs = hrs.getInt("rs");
                         h_ntgew = hrs.getInt("NTGEWx");
                         h_adjweight = hrs.getInt("stdweight");
+                        //h_allowby = hrs.getString("allow_by");
 
 
+                    }
+
+                    if(h_lock==null){
+                        h_lock = "";
                     }
 
                    /* h_adjweight = h_ntgew ;
@@ -1467,6 +1525,8 @@ public class AddProducts extends AppCompatActivity {
                             break;
                         case "OPS" : plant = " and werks in ('2010','9060','1020','9020')";
                             break;
+                        case "MMT" : plant = " and werks in ('3030','9030')";
+                            break;
                     }
 
                     //todo MAT CODE char at "3" F,M fix to wildcard
@@ -1546,6 +1606,24 @@ public class AddProducts extends AppCompatActivity {
 
     }
 
+    public void setAllMat(String lock){
+
+        String all = "รวม";
+        String notall = "ปกติ";
+
+        if(!lock.equals("X")){
+            btnALL.setText(notall);
+            tv_arktx.setText(h_arktx);
+            isAll = false;
+
+        }else{
+            btnALL.setText(all);
+            tv_arktx.setText("ขึ้นของแบบรวมเกรด");
+            isAll = true;
+        }
+
+    }
+
     public void stockPick(String pickmat, String pickplant){
 
         final Dialog pickdialog = new Dialog(AddProducts.this);
@@ -1589,7 +1667,11 @@ public class AddProducts extends AppCompatActivity {
                 String pickmatnr = (String) obj.get("MATNR");
                 String pick_rmd_charge= (String) obj.get("rmd_charge");
                 String pick_rmd_bundle = (String) obj.get("rmd_bundle");
-
+                if(pickmatnr != null || !pickmatnr.equals("")){
+                    if(pickmatnr.substring(0,2).equals("CO")){
+                        pick_rmd_bundle = "1";
+                    }
+                }
                 Animation animation1 = new AlphaAnimation(0.3f, 1.0f);
                 animation1.setDuration(2000);
                 arg1.startAnimation(animation1);
@@ -2127,6 +2209,7 @@ public class AddProducts extends AppCompatActivity {
             btn_del.setVisibility(View.GONE);
             btn_split.setVisibility(View.GONE);
             btn_pick.setVisibility(View.GONE);
+            btnALL.setVisibility(View.GONE);
             btn_complete.setText("ปิดจบเรียบร้อยแล้ว");
             btn_complete.setEnabled(false);
             btn_complete.setTextColor(Color.parseColor("#0C8600"));
@@ -2137,10 +2220,16 @@ public class AddProducts extends AppCompatActivity {
             btn_complete.setVisibility(View.GONE);
             btn_del.setVisibility(View.VISIBLE);
             btn_split.setVisibility(View.VISIBLE);
+
             if(usrHelper.getLevel().equals("10")){
                 btn_pick.setVisibility(View.VISIBLE);
+                btnALL.setVisibility(View.VISIBLE);
             }
 
+        }
+
+        if(g_vbeln.substring(0,1).equals("3")){
+            btnALL.setVisibility(View.GONE);
         }
 
 
@@ -2148,5 +2237,61 @@ public class AddProducts extends AppCompatActivity {
     }
 
 
+
+    public class allMat extends AsyncTask<String, String, String> {
+
+        String z = "";
+        Boolean isSuccess = false;
+
+        @Override
+        protected void onPreExecute() {
+            pbbar.setVisibility(View.VISIBLE);
+        }
+
+        @Override
+        protected void onPostExecute(String r) {
+            pbbar.setVisibility(View.GONE);
+            Toast.makeText(AddProducts.this, r, Toast.LENGTH_SHORT).show();
+
+            if(isSuccess==true) {
+
+                FillList fillList = new FillList();
+                fillList.execute(g_vbeln.trim(),g_posnr.trim());
+
+            }
+
+        }
+
+        @Override
+        protected String doInBackground(String... params) {
+
+            try {
+                Connection con = connectionClass.CONN();
+                if (con == null) {
+                    z = "Error in connection with SQL server";
+                } else {
+                    String p = "";
+                    if(params[0].equals("")){
+                        p = " NULL ";
+                        z = "เปลี่ยนเป็นขึ้นของแบบระบุรหัสสินค้า";
+                    }else{
+                        p = "'"+params[0]+"'";
+                        z = "เปลี่ยนเป็นขึ้นของแบบรวมเกรด";
+                    }
+                    String query = "update tbl_shipmentplan  set LOCK  = "+p+" WHERE vbeln = '"+h_vbeln+"' and posnr =  '"+h_posnr+"' ";
+                    PreparedStatement preparedStatement = con.prepareStatement(query);
+                    preparedStatement.executeUpdate();
+
+
+                    isSuccess = true;
+                }
+            } catch (Exception ex) {
+                isSuccess = false;
+                z = "เปลี่ยนไม่สำเร็จ";
+            }
+
+            return z;
+        }
+    }
 
 }

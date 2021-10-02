@@ -11,6 +11,7 @@ import android.widget.BaseExpandableListAdapter;
 import android.widget.Button;
 import android.widget.TextView;
 
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 
@@ -18,6 +19,7 @@ public class CustomExpandableListAdapter extends BaseExpandableListAdapter {
 
     private Context context;
     private List<String> expandableListTitle;
+    private List<Pair> pairs = new ArrayList<Pair>();
     private HashMap<String, List<String>> expandableListDetail;
 
 
@@ -69,12 +71,14 @@ public class CustomExpandableListAdapter extends BaseExpandableListAdapter {
                 .findViewById(R.id.expandedListItem);
         String stat = expandedListText.substring(expandedListText.length()-1);
         //expandedListTextView.setBackgroundColor(Color.parseColor("#4CAF50"));
-        if(stat.equals("1")){
+        if(!stat.equals("0")){
             expandedListTextView.setBackgroundColor(Color.parseColor("#B5FED8"));
         }
 
         expandedListTextView.setText(expandedListText.substring(0,expandedListText.length()-1));
        // Log.d("expani", expandedListText);
+
+
         return convertView;
 
     }

@@ -59,6 +59,8 @@ public class ar_list extends AppCompatActivity {
     String l = "";
     String rm ="";
     Button btn_noship ,btn_u;
+    String ponum = "";
+//    Boolean ship = false;
     List<Map<String, String>> vbelnlist  = new ArrayList<Map<String, String>>();
     List<Map<String, String>> picklist  = new ArrayList<Map<String, String>>();
 
@@ -87,7 +89,11 @@ public class ar_list extends AppCompatActivity {
             g_vbeln = (String) savedInstanceState.getSerializable("vbeln");
 
         }
-
+         ponum = "PO_NUM";
+        usrHelper = new UserHelper(this);
+        if(usrHelper.getPlant().equals("MMT")){
+            ponum = "Queue_num";
+        }
 
         closeBtn =(Button)findViewById(R.id.closeBtn);
         closedBtn = (Button)findViewById(R.id.closedBtn);
@@ -99,7 +105,7 @@ public class ar_list extends AppCompatActivity {
         list_vbeln = (ListView)findViewById(R.id.lvb);
         btn_noship = (Button) findViewById(R.id.btn_noship);
         btn_u = (Button) findViewById(R.id.btn_u);
-        usrHelper = new UserHelper(this);
+
         connectionClass = new ConnectionClass();
         sLine = new Line();
 
@@ -125,7 +131,10 @@ public class ar_list extends AppCompatActivity {
         btn_u.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                onOpenWeb();
+//
+                Intent i = new Intent(ar_list.this, Unlock.class);
+                i.putExtra("vbeln", g_vbeln);
+                startActivity(i);
             }
         });
 
@@ -173,6 +182,7 @@ public class ar_list extends AppCompatActivity {
 
     }
 
+
     public void onOpenWeb(){
         AlertDialog.Builder alert = new AlertDialog.Builder(ar_list.this);
         alert.setTitle("ปลดล็อค");
@@ -182,15 +192,26 @@ public class ar_list extends AppCompatActivity {
         WebSettings ws = wv.getSettings();
         ws.setJavaScriptEnabled(true);
         ws.setAllowFileAccess(true);
-        String url = "http:\\192.168.116.222/ship/unlock.php?s="+g_vbeln+"&u="+usrHelper.getUserName();
-        if(usrHelper.getPlant().equals("SPN")){
 
+
+
+//        WebView wv = (WebView)layoutTab.findViewById(R.id.webView2);
+
+
+
+        String url = "http:\\report.zubbsteel.com/ship/unlock.php?s="+g_vbeln+"&u="+usrHelper.getUserName();
+
+        if(usrHelper.getPlant().equals("MMT")){
+            url = "http:\\199.0.0.16/ship/unlock.php?s="+g_vbeln+"&u="+usrHelper.getUserName();
         }
-        wv.loadUrl("http:\\report.zubbsteel.com/ship/unlock.php?s="+g_vbeln+"&u="+usrHelper.getUserName());
+        wv.setFocusable(true);
+
         wv.setWebViewClient(new WebViewClient() {
             @Override
             public boolean shouldOverrideUrlLoading(WebView view, String url) {
                 view.loadUrl(url);
+
+
                 return true;
             }
         });
@@ -210,7 +231,8 @@ public class ar_list extends AppCompatActivity {
     public class VbelnFList extends AsyncTask<String, String, String> {
 
         String z = "";
-
+        String g ="";
+        Boolean ns = false;
         HashMap<String, List<String>> listTemp = new HashMap<String, List<String>>();
 
         @Override
@@ -238,6 +260,7 @@ public class ar_list extends AppCompatActivity {
 
             int c = expandableListAdapter.getGroupCount();
             for (int i = 0 ; i<c;i++){
+
                 expandableListView.expandGroup(i);
             }
 
@@ -281,6 +304,48 @@ public class ar_list extends AppCompatActivity {
 
                     return false;
                 }
+            });
+
+            expandableListView.setOnChildClickListener(new ExpandableListView.OnChildClickListener() {
+                @Override
+                public boolean onChildClick(ExpandableListView parent, View v,
+                                            int groupPosition, int childPosition, long id) {
+
+                    String item = expandableListDetail.get(expandableListTitle.get(groupPosition)).get(childPosition);
+                    item = item.substring(0,item.indexOf("-"));
+
+
+
+                    Intent i = new Intent(ar_list.this, AddProducts.class);
+                    i.putExtra("posnr", item);
+                    i.putExtra("vbeln", expandableListTitle.get(groupPosition));
+                    startActivity(i);
+
+                    return false;
+                }
+
+
+            });
+
+            expandableListView.setOnChildClickListener(new ExpandableListView.OnChildClickListener() {
+                @Override
+                public boolean onChildClick(ExpandableListView parent, View v,
+                                            int groupPosition, int childPosition, long id) {
+
+                    String item = expandableListDetail.get(expandableListTitle.get(groupPosition)).get(childPosition);
+                    item = item.substring(0,item.indexOf("-"));
+
+
+
+                    Intent i = new Intent(ar_list.this, AddProducts.class);
+                    i.putExtra("posnr", item);
+                    i.putExtra("vbeln", expandableListTitle.get(groupPosition));
+                    startActivity(i);
+
+                    return false;
+                }
+
+
             });
 
 
@@ -386,7 +451,19 @@ public class ar_list extends AppCompatActivity {
             //  Log.d("p8",z);
 
             checkComplete(h_apr);
+            if(listTemp.isEmpty()){
+                hideShip(true);
 
+            }else{
+                if(ns){
+                    hideShip(false);
+                }else {
+                    hideShip(true);
+                }
+
+
+
+            }
             pbbar.setVisibility(View.GONE);
 
         }
@@ -412,6 +489,8 @@ public class ar_list extends AppCompatActivity {
                             break;
                         case "RS" : vw = "vw_wsum_p8";
                             break;
+                        case "MMT" : vw = "vw_wsum_mmt";
+                            break;
                         default: vw ="vw_wsum_p8";
                     }
 
@@ -419,7 +498,7 @@ public class ar_list extends AppCompatActivity {
                     String qvb = " SELECT vbeln FROM "+vw+" where po_num = '"+params[0].trim()+"' group by vbeln ";
                     PreparedStatement vps = con.prepareStatement(qvb);
                     ResultSet vrs = vps.executeQuery();
-
+//
 
                     while (vrs.next()) {
 
@@ -428,16 +507,19 @@ public class ar_list extends AppCompatActivity {
                         String query = " SELECT * FROM "+vw+" where vbeln = '"+vrs.getString("vbeln")+"' and matnr is not null ";
                         PreparedStatement ps = con.prepareStatement(query);
                         ResultSet rs = ps.executeQuery();
-
+                        if(vrs.getString("vbeln").equals(params[0].trim())){
+                            ns = true;
+                        }
                         while (rs.next()) {
                             fetch_list.add(rs.getString("posnr") + "-" + rs.getString("arktx")+rs.getString("sscan"));
+//                            isShip(true);
 
                         }
+
                         listTemp.put(vrs.getString("vbeln"),fetch_list);
 
-
-
                     }
+
 
 
                     /*vbelnlist.clear();
@@ -472,7 +554,7 @@ public class ar_list extends AppCompatActivity {
                         h_divqty = "0" ;
                     }
 
-                    String qapr = "SELECT top 1 ApproveOn ,ApproveBy from tbl_shipmentplan where po_num = '"+g_vbeln+"'  order by 2 asc  " ;
+                    String qapr = "SELECT top 1 ApproveOn ,ApproveBy from tbl_shipmentplan where "+ponum+" = '"+g_vbeln+"'  order by 2 asc  " ;
                     PreparedStatement aps = con.prepareStatement(qapr);
                     ResultSet ars = aps.executeQuery();
 
@@ -483,6 +565,11 @@ public class ar_list extends AppCompatActivity {
                         //sumweight = qrs.getInt("sw");
                     }
 
+//                    if(g==null || g==""){
+//                        hideShip(true);
+//                    }else{
+//                        hideShip(false);
+//                    }
                      z = "Success";
                     //z = query ;
 
@@ -498,6 +585,23 @@ public class ar_list extends AppCompatActivity {
             return z;
         }
     }
+
+    public void hideShip(Boolean a){
+        if(a==true){
+            this.btn_noship.setVisibility(View.GONE);
+        }else{
+            this.btn_noship.setVisibility(View.VISIBLE);
+        }
+
+    }
+
+//    @Override
+//    public void onResume(){
+//        super.onResume();
+//        VbelnFList fillList = new VbelnFList();
+//        fillList.execute(g_vbeln.trim());
+//        Log.d("resume", g_vbeln);
+//    }
 
     public void onRemarkClick(){
         AlertDialog.Builder builder = new AlertDialog.Builder(ar_list.this);
@@ -683,11 +787,11 @@ public class ar_list extends AppCompatActivity {
                     z = "Error in connection with SQL server";
                 } else {
 
-                    String query = "update tbl_shipmentplan  set ApproveOn  = CURRENT_TIMESTAMP , ApproveBy = '"+usrHelper.getUserName()+"' WHERE po_num = '"+g_vbeln+"' and ApproveBy is null and ApproveOn is null";
+                    String query = "update tbl_shipmentplan  set ApproveOn  = CURRENT_TIMESTAMP , ApproveBy = '"+usrHelper.getUserName()+"' WHERE "+ponum+" = '"+g_vbeln+"' and ApproveBy is null and ApproveOn is null";
                     PreparedStatement preparedStatement = con.prepareStatement(query);
                     preparedStatement.executeUpdate();
 
-                    String qcarvis = "update tbl_shipment_carvisit  set OutTime  = CURRENT_TIMESTAMP WHERE seq = '"+g_vbeln+"' )";
+                    String qcarvis = "update tbl_shipment_carvisit  set OutTime  = CURRENT_TIMESTAMP WHERE seq = '"+g_vbeln+"' ";
                     PreparedStatement pStmcvsi = con.prepareStatement(qcarvis);
                     pStmcvsi.executeUpdate();
 
@@ -828,7 +932,7 @@ public class ar_list extends AppCompatActivity {
                         getMat = frs.getString("mat_code");
                     }
 
-                    String fDo = "select matnr,vbeln,posnr from tbl_shipment_item where ponum = '"+g_vbeln+"' and mat_code  = '"+getMat+"' ";
+                    String fDo = "select matnr,vbeln,posnr from tbl_shipment_item where "+ponum+" = '"+g_vbeln+"' and mat_code  = '"+getMat+"' ";
                     PreparedStatement fds = con.prepareStatement(fDo);
                     ResultSet drs = fds.executeQuery();
                     int cv = 0;

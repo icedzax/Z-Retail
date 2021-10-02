@@ -52,7 +52,7 @@ public class Login extends AppCompatActivity {
         bd = (Button) findViewById(R.id.bd);
         pbbar.setVisibility(View.GONE);
         gver = vers.Version;
-        ver.setText("ver : "+gver+" - "+connectionClass.getIp());
+        ver.setText("ver : "+gver+" - "+connectionClass.getUip());
         btnLogin.setOnClickListener(new View.OnClickListener() {
 
             @Override
@@ -185,7 +185,7 @@ public class Login extends AppCompatActivity {
                 Connection con =  connectionClass.CONN();
 
                 if (con == null) {
-                    z = "Network มีปัญหา\nกรุณาตรวจสอบ WIFI";
+                    z = "เชื่อมต่อไม่ได้ \nกรุณาตรวจสอบ WIFI";
                 } else {
 
                     String query = "select * from tbl_id_user where Id ='"+gPass+"'  " ;

@@ -237,6 +237,8 @@ public class CompleteDo extends AppCompatActivity {
                             break;
                         case "RS" : plant = "  ship_point ='1012' ";
                             break;
+                        case "MMT" : plant = "  ship_point <>'x' ";
+                            break;
 
                     }
 

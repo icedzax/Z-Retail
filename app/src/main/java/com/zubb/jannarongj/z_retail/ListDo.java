@@ -354,6 +354,8 @@ public class ListDo extends AppCompatActivity {
                                 default: vw ="gr_shipmentplan3";
                     }
 
+                    Log.d("vw_",params[2]+"\n"+vw);
+
                     if(params[1]==null || params[1].equals("")){
                         vbeln = "";
                     }else{
@@ -375,7 +377,7 @@ public class ListDo extends AppCompatActivity {
                     String query = "SELECT s.WADAT,s.VBELN,s.AR_NAME,s.CARLICENSE " +
                             "FROM "+vw+" as s LEFT JOIN dbo.tbl_shipment_item as i " +
                             "on i.VBELN = s.VBELN and i.POSNR = s.POSNR " +
-                            "where  s.VBELN is not null and left(s.MATNR,2) not in ('BL','SC') " +plant+ where+ " " + vbeln +
+                            "where  s.emp_code = '"+usrHelper.getUserName()+"' and s.VBELN is not null and left(s.MATNR,2) not in ('BL','SC') " +plant+ where+ " " + vbeln +
                             "group by s.VBELN,s.AR_NAME,s.CARLICENSE,s.WADAT " +having+
                             "order by 1 desc ";
 
