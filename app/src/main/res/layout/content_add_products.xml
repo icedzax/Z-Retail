@@ -577,6 +577,22 @@
                 android:textStyle="bold" />
 
             <Button
+                android:id="@+id/btnALL"
+                style="@style/Widget.AppCompat.Button.Borderless"
+                android:layout_width="wrap_content"
+                android:layout_height="match_parent"
+                android:layout_weight="1"
+                android:background="#03A9F4"
+                android:elevation="1dp"
+                android:text="ปกติ"
+                android:textAlignment="center"
+                android:textAllCaps="false"
+                android:textColor="#000000"
+                android:textSize="20sp"
+                android:textStyle="bold"
+                android:visibility="gone" />
+
+            <Button
                 android:id="@+id/btn_split"
                 style="@style/Widget.AppCompat.Button.Borderless"
                 android:layout_width="wrap_content"
