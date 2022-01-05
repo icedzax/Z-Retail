@@ -819,16 +819,33 @@ public class AddProducts extends AppCompatActivity {
                                 hm = hmat.substring(0, mm) + "" + hmat.substring(tr, hmat.length());*/
 
                                 //if (hm.equals(sm)) {  // FOLD != M
+                                String mat2 = hmat.substring(0,2);
                                 if (hmat.equals(smat)) {
                                     setErMm(0);
-                                } else if (isAll){
-                                    if(h_matnr.trim().substring(0,3).equals(matcode.trim().substring(0,3))){
+                                }else if (isAll){
+                                    String allM = smat.trim().substring(0,3);
+                                    if (mat2.equals("GI") || mat2.equals("GZ")){
+                                        allM = mat2+smat.charAt(2);
+                                    }
+                                    if(h_matnr.trim().substring(0,3).equals(allM)){
                                         setErMm(0);
                                     }else{
                                         setErMm(1);
                                     }
 
-                                }else {
+                                }else if (mat2.equals("GI") || mat2.equals("GZ")){
+                                    if(smat.substring(0,2).equals("GI") || smat.substring(0,2).equals("GZ")){
+                                        String ocpMat = hmat.substring(0,2)+smat.substring(2);
+                                        if (ocpMat.equals(hmat)){
+                                            setErMm(0);
+                                        }else{
+                                            setErMm(1);
+                                        }
+                                    }else{
+                                        setErMm(1);
+                                    }
+                                }
+                                else {
 
                                     if(h_shippoint==null){
                                         h_shippoint = "";
@@ -977,6 +994,10 @@ public class AddProducts extends AppCompatActivity {
              if(h2.equals("DB") || h2.equals("RB")){
                  m = mat.substring(0,2)+mat.substring(3,l);
                  h = hmat.substring(0,2)+hmat.substring(3,l);
+             }
+             else if(h2.equals("GI") || h2.equals("GZ")){
+                 m = mat.substring(0,1)+mat.substring(3,l);
+                 h = hmat.substring(0,1)+hmat.substring(3,l);
              }
              else{
                  m = mat.substring(0,l);
@@ -1161,6 +1182,7 @@ public class AddProducts extends AppCompatActivity {
                     /*else if (stock == 1) {
                         msg = "ขึ้นของเกิน STOCK\nHN: "+hn+"\nขึ้น : "+qty+" เส้น" + "\nSTOCK : เส้น"+"\n\n" + "Code " + scanresult;
                     }*/
+
         }
 
         new AlertDialog.Builder(context)
@@ -1668,7 +1690,8 @@ public class AddProducts extends AppCompatActivity {
                 String pick_rmd_charge= (String) obj.get("rmd_charge");
                 String pick_rmd_bundle = (String) obj.get("rmd_bundle");
                 if(pickmatnr != null || !pickmatnr.equals("")){
-                    if(pickmatnr.substring(0,2).equals("CO")){
+                    if(pickmatnr.substring(0,2).equals("CO") || pickmatnr.substring(0,2).equals("CL")){
+                        pick_rmd_charge = (String) obj.get("CHARG");
                         pick_rmd_bundle = "1";
                     }
                 }
